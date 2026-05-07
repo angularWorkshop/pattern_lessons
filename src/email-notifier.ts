@@ -1,14 +1,13 @@
 import type { SentEmail } from './order-types.js';
 
 export class EmailNotifier {
-  // TODO: extract email sending out of OrderService.
-  // Real production code would call SMTP — here just record into a list,
-  // so tests can inspect what was sent.
-  public send(_to: string, _body: string): void {
-    throw new Error('EmailNotifier.send is not implemented yet');
+  private readonly sent: SentEmail[] = [];
+
+  public send(to: string, body: string): void {
+    this.sent.push({ to, body });
   }
 
   public getSent(): readonly SentEmail[] {
-    throw new Error('EmailNotifier.getSent is not implemented yet');
+    return this.sent;
   }
 }

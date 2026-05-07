@@ -6,11 +6,21 @@ export interface PriceBreakdown {
   total: number;
 }
 
+const DISCOUNT_RATES: Record<Order['customerType'], number> = {
+  premium: 0.10,
+  member: 0.05,
+  guest: 0,
+};
+
 export class DiscountCalculator {
-  // TODO: extract subtotal/discount/total math out of OrderService.
-  // Rates: premium = 10%, member = 5%, guest = 0.
-  // Round total to 2 decimals.
-  public calculate(_order: Order): PriceBreakdown {
-    throw new Error('DiscountCalculator.calculate is not implemented yet');
+  public calculate(order: Order): PriceBreakdown {
+    const subtotal = order.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+    const rate = DISCOUNT_RATES[order.customerType];
+    const discount = Math.round(subtotal * rate * 100) / 100;
+    const total = Math.round((subtotal - discount) * 100) / 100;
+    return { subtotal, discount, total };
   }
 }
