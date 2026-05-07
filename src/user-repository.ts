@@ -1,10 +1,8 @@
-import type { User } from './user-types.js';
+import type { User, UserRole } from './user-types.js';
 
-// TODO: complete this interface so it covers everything PostgresUserRepository
-// already exposes. Right now only `save` is declared — add findById,
-// findByEmail and findByRole. Then make UserService and the repositories
-// implement / accept this interface.
 export interface UserRepository {
   save(user: User): Promise<void>;
-  // TODO: declare findById, findByEmail, findByRole
+  findById(id: string): Promise<User | undefined>;
+  findByEmail(email: string): Promise<User | undefined>;
+  findByRole(role: UserRole): Promise<User[]>;
 }

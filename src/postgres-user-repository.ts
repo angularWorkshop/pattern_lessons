@@ -1,9 +1,10 @@
 import type { User, UserRole } from './user-types.js';
+import type { UserRepository } from './user-repository.js';
 
 // Production stand-in. In a real codebase this would talk to Postgres
 // through pg / Prisma / Drizzle. Here it intentionally fails: the whole
 // point of DIP is to be able to test UserService without spinning up a DB.
-export class PostgresUserRepository {
+export class PostgresUserRepository implements UserRepository {
   private readonly connectionString: string;
 
   public constructor(connectionString: string = process.env['POSTGRES_URL'] ?? '') {

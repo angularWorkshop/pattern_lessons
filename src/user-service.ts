@@ -1,14 +1,11 @@
 import type { User, UserRole } from './user-types.js';
-import { PostgresUserRepository } from './postgres-user-repository.js';
+import type { UserRepository } from './user-repository.js';
 
-// TODO: refactor UserService to depend on the UserRepository interface
-// instead of the concrete PostgresUserRepository. Accept the repository
-// via the constructor so tests can pass an in-memory one.
 export class UserService {
-  private readonly repo: PostgresUserRepository;
+  private readonly repo: UserRepository;
 
-  public constructor() {
-    this.repo = new PostgresUserRepository();
+  public constructor(repository: UserRepository) {
+    this.repo = repository;
   }
 
   public async register(email: string, name: string, role: UserRole): Promise<User> {

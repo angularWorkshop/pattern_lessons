@@ -1,4 +1,4 @@
-# Topic 1 · Exercise 1.2 — DIP через интерфейс UserRepository
+# Topic 1 · Exercise 1.2 — DIP через интерфейс UserRepository · Solution
 
 `UserService` сейчас намертво завязан на конкретный `PostgresUserRepository`.
 В тестах это мешает: на проде нужен реальный Postgres, а тестов без БД у нас не получится.
