@@ -1,26 +1,8 @@
-export type Brand<T, Name extends string> = T & { readonly __brand: Name };
-
-export type UserId = Brand<string, 'UserId'>;
-
-export interface LessonUser {
-  id: UserId;
-  name: string;
-  email?: string;
-}
-
-export function createUserId(value: string): UserId {
-  return value as UserId;
-}
-
-export function createLessonUser(name: string, email?: string): LessonUser {
-  return {
-    id: createUserId(`user:${name.toLowerCase()}`),
-    name,
-    ...(email ? { email } : {}),
-  };
-}
-
-export function sum(values: readonly number[]): number {
-  return values.reduce((total: number, value: number) => total + value, 0);
-}
-
+export type { Order, OrderItem, OrderResult, CustomerType, SentEmail } from './order-types.js';
+export { OrderService } from './order-service.js';
+export { OrderValidator } from './order-validator.js';
+export { DiscountCalculator } from './discount-calculator.js';
+export type { PriceBreakdown } from './discount-calculator.js';
+export { OrderRepository } from './order-repository.js';
+export { EmailNotifier } from './email-notifier.js';
+export { InvoiceGenerator } from './invoice-generator.js';

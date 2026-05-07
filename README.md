@@ -1,53 +1,41 @@
-# pattern_lessons
+# Topic 1 · Exercise 1.1 — Распилить божественный класс (SRP)
 
-Base repository for EduTec Design Patterns course exercises.
+В `src/order-service.ts` лежит класс `OrderService`, который умеет делать всё сразу:
+валидировать, считать скидки, сохранять в хранилище, слать письма и собирать инвойс.
+Тесты в `tests/unit/integration.test.ts` показывают, что снаружи он работает —
+но внутри это пять разных причин для изменений в одном классе.
 
-Each exercise should branch from `main` into:
+## Цель
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+Применить **Single Responsibility Principle**: вынести каждую обязанность в свой класс,
+а `OrderService` оставить координатором, который только связывает их.
 
-The repository is intentionally framework-agnostic. It provides:
+## Что нужно сделать
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+1. Реализовать пять стаб-классов — сейчас все их методы кидают «not implemented»:
+   - `src/order-validator.ts` — `validate(order)` бросает на: пустых items, кривом email
+     (без `@`), не положительных `price` или `quantity`.
+   - `src/discount-calculator.ts` — `calculate(order)` возвращает
+     `{ subtotal, discount, total }`. Скидка: `premium` = 10%, `member` = 5%,
+     `guest` = 0. Итог округляется до 2 знаков.
+   - `src/order-repository.ts` — `save(order)` и `find(id)` через внутренний `Map`.
+   - `src/email-notifier.ts` — `send(to, body)` складывает письмо в массив,
+     `getSent()` возвращает его как `readonly`.
+   - `src/invoice-generator.ts` — `generate(order, total)` собирает строку инвойса
+     по тому же формату, что и сейчас в `OrderService.placeOrder`.
+2. Перевести `OrderService` на инъекцию зависимостей. Конструктор уже принимает
+   `OrderServiceDeps`, но игнорирует их. Сохранить переданных коллабораторов на
+   `this`, при отсутствии — создавать дефолтные. В `placeOrder` использовать их
+   вместо встроенной логики.
+3. Локально убедиться, что все тесты зелёные:
+   ```bash
+   npm run check
+   ```
 
-## Production standard
+## Критерии сдачи
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
-
-Recommended workflow for a new exercise:
-
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- `OrderService.placeOrder` ничего не делает сам, только зовёт коллабораторов
+- Каждый из пяти классов отвечает за одну вещь
+- Все тесты в `tests/unit/integration.test.ts`, `tests/unit/srp.test.ts`,
+  `tests/types/index.test.ts` зелёные
+- `npm run check` проходит без ошибок
