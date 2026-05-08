@@ -1,4 +1,4 @@
-# Topic 7 · Exercise 7.2 — Адаптер callback → Promise
+# Topic 7 · Exercise 7.2 — Адаптер callback → Promise · Solution
 
 Реализовать `promisify`, который превращает функцию с Node-style callback в обычную async-функцию.
 
