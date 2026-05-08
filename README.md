@@ -1,4 +1,4 @@
-# Topic 11 · Exercise 11.2 — Facade над localStorage
+# Topic 11 · Exercise 11.2 — Facade над localStorage · Solution
 
 `Storage` прячет три разные вещи: JSON-сериализацию, версионирование схемы и fallback на in-memory когда основной storage сломался.
 

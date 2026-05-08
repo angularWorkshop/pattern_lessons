@@ -3,12 +3,6 @@ import {
   type RawStorage,
 } from './raw-storage.js';
 
-// Facade над raw-storage: добавляет JSON-сериализацию, версионирование схемы
-// и fallback на in-memory, если основной storage сломан.
-//
-// Каждое значение хранится в обёртке: { v: <schemaVersion>, d: <data> }
-// При getItem с другой версией — возвращаем undefined (миграция выходит за рамки).
-
 export interface StorageOptions {
   raw?: RawStorage;
   schemaVersion?: number;
@@ -19,9 +13,6 @@ interface Wrapped {
   d: unknown;
 }
 
-// TODO: реализовать. Storage инкапсулирует RawStorage, JSON и version.
-// На setItem ошибку RawStorage → перейти на in-memory fallback и записать туда.
-// Это и есть «чёрный ящик» Facade'а: snaружи никто не должен знать про fallback.
 export class Storage {
   private raw: RawStorage;
   private fallback: InMemoryRawStorage | null = null;
@@ -33,15 +24,48 @@ export class Storage {
     this.schemaVersion = options.schemaVersion ?? 1;
   }
 
-  public set<T>(_key: string, _value: T): void {
-    throw new Error('Storage.set is not implemented yet');
+  public set<T>(key: string, value: T): void {
+    const wrapped: Wrapped = { v: this.schemaVersion, d: value };
+    const serialized = JSON.stringify(wrapped);
+    try {
+      this.raw.setItem(key, serialized);
+    } catch {
+      this.activateFallback();
+      this.raw.setItem(key, serialized);
+    }
   }
 
-  public get<T>(_key: string): T | undefined {
-    throw new Error('Storage.get is not implemented yet');
+  public get<T>(key: string): T | undefined {
+    const raw = this.raw.getItem(key);
+    if (raw === null) return undefined;
+    let parsed: Wrapped;
+    try {
+      parsed = JSON.parse(raw) as Wrapped;
+    } catch {
+      return undefined;
+    }
+    if (parsed.v !== this.schemaVersion) {
+      return undefined;
+    }
+    return parsed.d as T;
   }
 
-  public remove(_key: string): void {
-    throw new Error('Storage.remove is not implemented yet');
+  public remove(key: string): void {
+    try {
+      this.raw.removeItem(key);
+    } catch {
+      this.activateFallback();
+      this.raw.removeItem(key);
+    }
+  }
+
+  private activateFallback(): void {
+    if (this.fallback) {
+      this.raw = this.fallback;
+      return;
+    }
+    this.fallback = new InMemoryRawStorage();
+    this.raw = this.fallback;
+    this.usingFallback = true;
   }
 }
