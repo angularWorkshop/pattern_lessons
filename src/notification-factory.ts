@@ -1,10 +1,24 @@
 import type { ChannelType, Notification } from './notification.js';
+import { EmailNotification } from './email-notification.js';
+import { SmsNotification } from './sms-notification.js';
+import { PushNotification } from './push-notification.js';
+import { TelegramNotification } from './telegram-notification.js';
 
-// TODO: implement the factory. Map a ChannelType to the right Notification class.
-// Use a Map<ChannelType, () => Notification> internally so that adding a new
-// channel never requires editing if/else inside `create`.
+type NotificationConstructor = () => Notification;
+
 export class NotificationFactory {
-  public create(_channel: ChannelType): Notification {
-    throw new Error('NotificationFactory.create is not implemented yet');
+  private readonly registry = new Map<ChannelType, NotificationConstructor>([
+    ['email', () => new EmailNotification()],
+    ['sms', () => new SmsNotification()],
+    ['push', () => new PushNotification()],
+    ['telegram', () => new TelegramNotification()],
+  ]);
+
+  public create(channel: ChannelType): Notification {
+    const factory = this.registry.get(channel);
+    if (!factory) {
+      throw new Error(`No notification registered for channel: ${String(channel)}`);
+    }
+    return factory();
   }
 }

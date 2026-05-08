@@ -1,4 +1,4 @@
-# Topic 2 · Exercise 2.1 — Factory Method для уведомлений
+# Topic 2 · Exercise 2.1 — Factory Method для уведомлений · Solution
 
 В <code>src/dispatcher.ts</code> сидит классический switch по типу канала. Работает,
 но любое добавление нового канала — это правка <code>Dispatcher</code>. И это та самая
