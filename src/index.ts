@@ -1,26 +1,4 @@
-export type Brand<T, Name extends string> = T & { readonly __brand: Name };
-
-export type UserId = Brand<string, 'UserId'>;
-
-export interface LessonUser {
-  id: UserId;
-  name: string;
-  email?: string;
-}
-
-export function createUserId(value: string): UserId {
-  return value as UserId;
-}
-
-export function createLessonUser(name: string, email?: string): LessonUser {
-  return {
-    id: createUserId(`user:${name.toLowerCase()}`),
-    name,
-    ...(email ? { email } : {}),
-  };
-}
-
-export function sum(values: readonly number[]): number {
-  return values.reduce((total: number, value: number) => total + value, 0);
-}
-
+export type { HttpClient, HttpRequest, HttpResponse } from './http-client.js';
+export { makeMockClient } from './http-client.js';
+export type { LogEntry } from './decorators.js';
+export { withLogging, withRetry, withCache } from './decorators.js';
