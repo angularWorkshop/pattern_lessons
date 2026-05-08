@@ -1,4 +1,4 @@
-# Topic 6 · Exercise 6.2 — Cache singleton с изоляцией тестов
+# Topic 6 · Exercise 6.2 — Cache singleton с изоляцией тестов · Solution
 
 Реализовать `Cache<V>` как singleton, но так, чтобы тесты не текли друг в друга. Это и есть основная боль singleton'ов: глобальное состояние.
 
