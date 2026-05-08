@@ -1,12 +1,9 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { createLazy } from '../../src/lazy-proxy.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
-  });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+describe('createLazy type contract', () => {
+  it('returns the same type the factory returns', () => {
+    const lazy = createLazy(() => ({ id: 'x', value: 42 }));
+    expectTypeOf(lazy).toEqualTypeOf<{ id: string; value: number }>();
   });
 });

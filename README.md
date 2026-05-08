@@ -1,53 +1,24 @@
-# pattern_lessons
+# Topic 13 · Exercise 13.1 — Proxy: lazy-loading
 
-Base repository for EduTec Design Patterns course exercises.
+`createLazy(factory)` возвращает прокси-объект, у которого тяжёлая инициализация откладывается до первого реального обращения. Снаружи объект «уже готов», а на самом деле фабрика ещё не вызвана.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/lazy-proxy.ts`:
 
-The repository is intentionally framework-agnostic. It provides:
+- Реализуй `createLazy<T>(factory)` через встроенный `Proxy`
+- Локальная переменная `cached: T | null = null` в closure
+- Возвращай `new Proxy({} as T, { get(target, prop) { ... } })`:
+  - Если `cached === null` — вызвать `factory()` и сохранить
+  - Вернуть `(cached as Record<...>)[prop]`
+- Для метода: если результат — функция, надо привязать `this`: `typeof value === 'function' ? value.bind(cached) : value`
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+## Главное
 
-## Production standard
+Тест `factory is NOT called on createLazy()` проверяет, что создание прокси никого не инициализирует. `factory IS called on first property access` — что после первого `lazy.id` фабрика вызывается. `factory is NOT called twice` — кэш работает.
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+## Критерии сдачи
 
-Recommended workflow for a new exercise:
-
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- 6 тестов в `tests/unit/lazy-proxy.test.ts` зелёные
+- Тип `createLazy(() => X)` возвращает `X`
+- `npm run check` зелёный
