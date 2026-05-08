@@ -1,12 +1,13 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { Storage } from '../../src/storage.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Storage type contracts', () => {
+  it('get is generic — returns T | undefined', () => {
+    const s = new Storage();
+    expectTypeOf(s.get<{ id: number }>('x')).toEqualTypeOf<{ id: number } | undefined>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('set takes string key and any T', () => {
+    const s = new Storage();
+    expectTypeOf(s.set<string>).parameters.toEqualTypeOf<[string, string]>();
   });
 });

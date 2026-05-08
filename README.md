@@ -1,53 +1,28 @@
-# pattern_lessons
+# Topic 11 · Exercise 11.2 — Facade над localStorage
 
-Base repository for EduTec Design Patterns course exercises.
+`Storage` прячет три разные вещи: JSON-сериализацию, версионирование схемы и fallback на in-memory когда основной storage сломался.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/storage.ts`:
 
-The repository is intentionally framework-agnostic. It provides:
+- `set(key, value)`:
+  - Сериализуй обёртку `{ v: schemaVersion, d: value }` в JSON
+  - Попробуй записать через `this.raw.setItem`
+  - Если бросилось исключение — создай `InMemoryRawStorage` в `this.fallback`, выставь `usingFallback = true`, переключи `this.raw` на fallback и повтори запись
+- `get(key)`:
+  - Прочитай через `this.raw.getItem`
+  - Если null → undefined
+  - Распарси JSON; если `parsed.v !== schemaVersion` → undefined
+  - Иначе верни `parsed.d as T`
+- `remove(key)` — `this.raw.removeItem(key)` с тем же fallback'ом
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+## Главное
 
-## Production standard
+Внешний код не должен знать ни про JSON, ни про версионирование, ни про fallback. Снаружи это всё ещё «положи / возьми по ключу». Это и есть Facade — обёртка, которая прячет три разных слоя.
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+## Критерии сдачи
 
-Recommended workflow for a new exercise:
-
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- 9 тестов в `tests/unit/storage.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` зелёный
