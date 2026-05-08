@@ -1,53 +1,24 @@
-# pattern_lessons
+# Topic 3 · Exercise 3.1 — Abstract Factory: семейства БД-объектов
 
-Base repository for EduTec Design Patterns course exercises.
+В `src/postgres-factory.ts` и `src/sqlite-factory.ts` лежат фабрики для двух СУБД.
+Каждая создаёт три связанных объекта: `Connection`, `QueryRunner`, `Transaction`.
+Сейчас все методы продуктов кидают «not implemented». Задача — реализовать их,
+сохранив главное правило **Abstract Factory**: объекты внутри одной семьи
+работают только друг с другом.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+1. **Реализовать Postgres-семью**:
+   - `PostgresConnection.open/close/isOpen` — `_open` flag, `open()` ставит `true`, `close()` — `false`
+   - `PostgresQueryRunner.run(conn, sql)` — вернуть `[{ engine: 'postgres', sql }]`. **Если `conn.engine !== 'postgres'`** — кинуть ошибку с упоминанием engine
+   - `PostgresTransaction.begin(conn)` — проверить engine, выставить `isActive = true`. `commit/rollback` — снять флаг
 
-The repository is intentionally framework-agnostic. It provides:
+2. **Реализовать Sqlite-семью** — те же три класса, та же логика, только `engine: 'sqlite'`
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+3. **Cross-engine защита** — это главное в Abstract Factory. PostgresQueryRunner на SqliteConnection должен падать с понятной ошибкой, и наоборот
 
-## Production standard
+## Критерии сдачи
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
-
-Recommended workflow for a new exercise:
-
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- Все тесты в `tests/unit/factory.test.ts` зелёные (12 кейсов: внутри-семьи + cross-engine)
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` проходит без ошибок
