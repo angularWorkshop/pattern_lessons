@@ -1,7 +1,3 @@
-// Flyweight: виртуализированный список.
-// Список из 100 000 элементов, но в памяти живёт только ~viewportSize нод.
-// При прокрутке существующие ноды переиспользуются с новым контентом.
-
 export interface VisibleRow<T> {
   nodeId: number;
   item: T;
@@ -26,17 +22,27 @@ export class VirtualList<T> {
     this.viewportSize = viewportSize;
   }
 
-  // TODO: scrollTo(offset).
-  // Возвращает массив VisibleRow для индексов [offset, offset + viewportSize)
-  // (clamp к items.length).
-  // Логика:
-  // - Для каждого видимого индекса i:
-  //   - Возьми i-й слот пула (создай node если ещё нет, увеличь totalNodesCreated)
-  //   - Запиши items[i] в node.currentItem, index в node.currentIndex
-  //   - Положи { nodeId, item, index } в результат
-  // - Размер пула не превышает viewportSize.
-  public scrollTo(_offset: number): readonly VisibleRow<T>[] {
-    throw new Error('VirtualList.scrollTo is not implemented yet');
+  public scrollTo(offset: number): readonly VisibleRow<T>[] {
+    const start = Math.max(0, offset);
+    const end = Math.min(this.items.length, start + this.viewportSize);
+    const result: VisibleRow<T>[] = [];
+
+    for (let i = 0; i < end - start; i++) {
+      const itemIndex = start + i;
+      const item = this.items[itemIndex] as T;
+
+      let node = this.pool[i];
+      if (!node) {
+        node = { id: this.nextNodeId++, currentItem: null, currentIndex: null };
+        this.pool[i] = node;
+        this.totalNodesCreated++;
+      }
+      node.currentItem = item;
+      node.currentIndex = itemIndex;
+
+      result.push({ nodeId: node.id, item, index: itemIndex });
+    }
+    return result;
   }
 
   public getTotalNodesCreated(): number {
