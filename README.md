@@ -1,53 +1,34 @@
-# pattern_lessons
+# Topic 5 · Exercise 5.2 — HistoryStack для undo/redo
 
-Base repository for EduTec Design Patterns course exercises.
+Реализовать `HistoryStack<T>` через клонирование снапшотов. На каждый `push` снимаем копию состояния — чтобы потом `undo` вернул именно ту версию, что была в момент пуша, а не «текущее» состояние, которое мог кто-то мутировать снаружи.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/history-stack.ts`:
 
-The repository is intentionally framework-agnostic. It provides:
+- `getState()` — возвращает `current`. Лучше клон, чтобы внешний код не мог мутировать стейт без `push`
+- `push(state)`:
+  - кладёт **клон** `current` в `undoStack`
+  - выставляет `current = клон(state)` (защита от мутации источника)
+  - чистит `redoStack`
+- `undo()`:
+  - если `undoStack` пуст — `throw`
+  - кладёт **клон** `current` в `redoStack`
+  - вытаскивает последний из `undoStack`, делает текущим, возвращает клон
+- `redo()` — симметрично undo
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+`canUndo` / `canRedo` уже работают.
 
-## Production standard
+## Главное
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+Клонировать обе стороны: и при сохранении в стек, и при возврате наружу. Без этого внешние мутации текут в историю, либо мутации внутри истории текут в текущее состояние.
 
-Recommended workflow for a new exercise:
+## Реализация клона
 
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
+Можно использовать `structuredClone` из стандартной библиотеки — это нормальная альтернатива своему deepClone из предыдущего упражнения.
 
-## Scripts
+## Критерии сдачи
 
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- 10 тестов в `tests/unit/history-stack.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` зелёный
