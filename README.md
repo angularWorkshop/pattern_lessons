@@ -1,4 +1,4 @@
-# Topic 4 · Exercise 4.2 — Builder для HTTP-запроса
+# Topic 4 · Exercise 4.2 — Builder для HTTP-запроса · Solution
 
 Сделать fluent-builder, собирающий объект `HttpRequest`. Метод HTTP, путь и опциональные шаги (заголовки, query, body) — каждое выставляется отдельным методом цепочки. Финальный `build()` валидирует и возвращает готовый объект.
 

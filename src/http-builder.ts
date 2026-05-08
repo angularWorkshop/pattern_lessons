@@ -8,42 +8,65 @@ export interface HttpRequest {
   body: unknown;
 }
 
+const NO_BODY_METHODS: ReadonlySet<HttpMethod> = new Set(['GET', 'DELETE']);
+
 export class HttpBuilder {
   protected method: HttpMethod | null = null;
   protected pathValue: string | null = null;
   protected headersMap: Record<string, string> = {};
   protected queryMap: Record<string, string> = {};
   protected bodyValue: unknown = undefined;
-
-  // TODO: каждый метод сохраняет состояние и возвращает this.
-  // build() собирает HttpRequest, валидирует обязательные шаги (method + path)
-  // и запрещает body на GET.
+  protected bodyWasSet = false;
 
   public get(): this {
-    throw new Error('HttpBuilder.get is not implemented yet');
+    this.method = 'GET';
+    return this;
   }
   public post(): this {
-    throw new Error('HttpBuilder.post is not implemented yet');
+    this.method = 'POST';
+    return this;
   }
   public put(): this {
-    throw new Error('HttpBuilder.put is not implemented yet');
+    this.method = 'PUT';
+    return this;
   }
   public delete(): this {
-    throw new Error('HttpBuilder.delete is not implemented yet');
+    this.method = 'DELETE';
+    return this;
   }
-  public path(_path: string): this {
-    throw new Error('HttpBuilder.path is not implemented yet');
+  public path(path: string): this {
+    this.pathValue = path;
+    return this;
   }
-  public header(_name: string, _value: string): this {
-    throw new Error('HttpBuilder.header is not implemented yet');
+  public header(name: string, value: string): this {
+    this.headersMap[name] = value;
+    return this;
   }
-  public queryParam(_name: string, _value: string): this {
-    throw new Error('HttpBuilder.queryParam is not implemented yet');
+  public queryParam(name: string, value: string): this {
+    this.queryMap[name] = value;
+    return this;
   }
-  public body(_payload: unknown): this {
-    throw new Error('HttpBuilder.body is not implemented yet');
+  public body(payload: unknown): this {
+    this.bodyValue = payload;
+    this.bodyWasSet = true;
+    return this;
   }
   public build(): HttpRequest {
-    throw new Error('HttpBuilder.build is not implemented yet');
+    if (!this.method) {
+      throw new Error('HttpBuilder: HTTP method must be set before build()');
+    }
+    if (!this.pathValue) {
+      throw new Error('HttpBuilder: path must be set before build()');
+    }
+    if (this.bodyWasSet && NO_BODY_METHODS.has(this.method)) {
+      throw new Error(`HttpBuilder: body is not allowed on ${this.method} requests`);
+    }
+    return {
+      method: this.method,
+      path: this.pathValue,
+      headers: { ...this.headersMap },
+      query: { ...this.queryMap },
+      body: this.bodyValue,
+    };
   }
 }
