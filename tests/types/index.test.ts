@@ -1,12 +1,19 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { QueryBuilder, type ComparisonOp, type OrderDirection, type SqlOutput } from '../../src/query-builder.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('QueryBuilder type contracts', () => {
+  it('ComparisonOp covers the expected operators', () => {
+    expectTypeOf<ComparisonOp>().toEqualTypeOf<'=' | '!=' | '>' | '<' | '>=' | '<=' | 'LIKE'>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('OrderDirection is ASC or DESC', () => {
+    expectTypeOf<OrderDirection>().toEqualTypeOf<'ASC' | 'DESC'>();
+  });
+  it('select returns the builder for chaining', () => {
+    expectTypeOf(QueryBuilder.prototype.select).returns.toEqualTypeOf<QueryBuilder>();
+  });
+  it('toSQL returns a SqlOutput with sql and params', () => {
+    expectTypeOf(QueryBuilder.prototype.toSQL).returns.toEqualTypeOf<SqlOutput>();
+    expectTypeOf<SqlOutput['sql']>().toEqualTypeOf<string>();
+    expectTypeOf<SqlOutput['params']>().toEqualTypeOf<readonly unknown[]>();
   });
 });
