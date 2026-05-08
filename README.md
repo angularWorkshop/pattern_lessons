@@ -1,4 +1,4 @@
-# Topic 2 · Exercise 2.2 — Factory Method для парсеров с runtime-регистрацией
+# Topic 2 · Exercise 2.2 — Factory Method для парсеров с runtime-регистрацией · Solution
 
 `DocumentLoader` сейчас содержит switch по mime-формату. Парсеров три (CSV, JSON, XML),
 все работают. Тесты требуют четвёртый — YAML — но не как ещё одну hardcoded ветку.

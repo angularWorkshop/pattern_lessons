@@ -25,8 +25,9 @@ describe('Parser factory type contracts', () => {
     >();
   });
 
-  it('DocumentLoader accepts an optional ParserFactory in its constructor', () => {
-    expectTypeOf(DocumentLoader).constructorParameters.toMatchTypeOf<[ParserFactory?]>();
+  it('DocumentLoader can be constructed with or without an explicit factory', () => {
+    expectTypeOf(() => new DocumentLoader()).returns.toEqualTypeOf<DocumentLoader>();
+    expectTypeOf(() => new DocumentLoader(new ParserFactory())).returns.toEqualTypeOf<DocumentLoader>();
   });
 
   it('XmlNode shape is preserved', () => {

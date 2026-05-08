@@ -1,15 +1,26 @@
 import type { Parser, ParserFormat } from './parser.js';
+import { CsvParser } from './csv-parser.js';
+import { JsonParser } from './json-parser.js';
+import { XmlParser } from './xml-parser.js';
 
-// TODO: implement the factory. Internally use a Map<ParserFormat, () => Parser>
-// so that adding a new format never requires editing if/else inside `create`.
-//
-// The exercise also asks for a runtime-extensible factory: expose a
-// `register(format, factory)` method so calling code can plug a new
-// parser without editing this file.
+type ParserFactoryFn = () => Parser;
+
 export class ParserFactory {
-  public create(_format: ParserFormat): Parser {
-    throw new Error('ParserFactory.create is not implemented yet');
+  private readonly registry = new Map<ParserFormat, ParserFactoryFn>([
+    ['csv', () => new CsvParser()],
+    ['json', () => new JsonParser()],
+    ['xml', () => new XmlParser()],
+  ]);
+
+  public create(format: ParserFormat): Parser {
+    const factory = this.registry.get(format);
+    if (!factory) {
+      throw new Error(`No parser registered for format: ${String(format)}`);
+    }
+    return factory();
   }
 
-  // TODO: implement register(format, factory)
+  public register(format: ParserFormat, factory: ParserFactoryFn): void {
+    this.registry.set(format, factory);
+  }
 }
