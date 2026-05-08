@@ -1,4 +1,4 @@
-# Topic 10 · Exercise 10.3 — Decorator factory: @measure
+# Topic 10 · Exercise 10.3 — Decorator factory: @measure · Solution
 
 Реализуй TS Stage 3 decorator factory `@measure(reporter)`, измеряющую время выполнения метода. Должна работать на sync, async и при ошибках.
 
