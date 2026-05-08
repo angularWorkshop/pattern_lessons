@@ -1,12 +1,40 @@
 import type { Env, Expr } from './expr.js';
 
-// TODO: реализовать через exhaustive switch по node.kind.
-// num — вернуть value.
-// var — взять из env. Если ключа нет — кинуть ошибку с упоминанием name.
-// binop — вычислить left/right, применить op. Деление на 0 — ошибка.
-//
-// В default-ветке — `const _exhaustive: never = node` и throw,
-// чтобы при добавлении нового вида узла TypeScript ругался здесь.
-export function evaluate(_node: Expr, _env: Env): number {
-  throw new Error('evaluate is not implemented yet');
+export function evaluate(node: Expr, env: Env): number {
+  switch (node.kind) {
+    case 'num':
+      return node.value;
+    case 'var': {
+      const value = env[node.name];
+      if (value === undefined) {
+        throw new Error(`Unknown variable: ${node.name}`);
+      }
+      return value;
+    }
+    case 'binop': {
+      const left = evaluate(node.left, env);
+      const right = evaluate(node.right, env);
+      switch (node.op) {
+        case '+':
+          return left + right;
+        case '-':
+          return left - right;
+        case '*':
+          return left * right;
+        case '/':
+          if (right === 0) {
+            throw new Error('Division by zero');
+          }
+          return left / right;
+        default: {
+          const _exhaustiveOp: never = node.op;
+          throw new Error(`Unknown op: ${String(_exhaustiveOp)}`);
+        }
+      }
+    }
+    default: {
+      const _exhaustive: never = node;
+      throw new Error(`Unknown node kind: ${String(_exhaustive)}`);
+    }
+  }
 }

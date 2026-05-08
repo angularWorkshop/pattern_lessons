@@ -1,4 +1,4 @@
-# Topic 9 · Exercise 9.2 — Composite через discriminated union
+# Topic 9 · Exercise 9.2 — Composite через discriminated union · Solution
 
 То же дерево, но без классов: discriminated union + рекурсивные функции. В TypeScript это самый частый способ моделировать AST.
 
