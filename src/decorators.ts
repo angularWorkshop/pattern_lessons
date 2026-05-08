@@ -6,27 +6,45 @@ export interface LogEntry {
   durationMs: number;
 }
 
-// TODO: реализовать декоратор-обёртку.
-// Возвращает новый клиент, который перед/после реального вызова кладёт запись в `log`.
-// При ошибке тоже ставит запись (ok: false) и пробрасывает ошибку дальше.
-export function withLogging(_inner: HttpClient, _log: LogEntry[]): HttpClient {
-  throw new Error('withLogging is not implemented yet');
+export function withLogging(inner: HttpClient, log: LogEntry[]): HttpClient {
+  return async (req) => {
+    const started = Date.now();
+    try {
+      const response = await inner(req);
+      log.push({ url: req.url, ok: true, durationMs: Date.now() - started });
+      return response;
+    } catch (error) {
+      log.push({ url: req.url, ok: false, durationMs: Date.now() - started });
+      throw error;
+    }
+  };
 }
 
-// TODO: декоратор retry.
-// Если внутренний клиент кидает — повторяет запрос до `attempts` раз.
-// Все попытки кроме последней игнорируют ошибку. Последняя — пробрасывается.
-// Считает общее количество попыток в массиве (для теста).
-export function withRetry(_inner: HttpClient, _attempts: number): HttpClient {
-  throw new Error('withRetry is not implemented yet');
+export function withRetry(inner: HttpClient, attempts: number): HttpClient {
+  return async (req) => {
+    let lastError: unknown;
+    for (let i = 0; i < attempts; i++) {
+      try {
+        return await inner(req);
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    throw lastError;
+  };
 }
 
-// TODO: декоратор cache.
-// Кэширует ответ по url. Повторный запрос по тому же url возвращает кэшированный
-// ответ без вызова inner. Игнорирует TTL — простая версия.
-export function withCache(_inner: HttpClient): HttpClient {
-  throw new Error('withCache is not implemented yet');
+export function withCache(inner: HttpClient): HttpClient {
+  const cache = new Map<string, HttpResponse>();
+  return async (req) => {
+    const cached = cache.get(req.url);
+    if (cached) {
+      return cached;
+    }
+    const response = await inner(req);
+    cache.set(req.url, response);
+    return response;
+  };
 }
 
-// Реэкспорт типов
 export type { HttpClient, HttpRequest, HttpResponse };

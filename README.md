@@ -1,4 +1,4 @@
-# Topic 10 · Exercise 10.1 — Decorator: HTTP-клиент с обёртками
+# Topic 10 · Exercise 10.1 — Decorator: HTTP-клиент с обёртками · Solution
 
 Реализуй три функциональных декоратора: `withLogging`, `withRetry`, `withCache`. Каждый — функция `(client) =&gt; client`, которая оборачивает базовый клиент новым поведением. Композиция: `withCache(withRetry(withLogging(base, log), 3))`.
 
