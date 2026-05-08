@@ -1,12 +1,17 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { Cache } from '../../src/cache.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Cache type contracts', () => {
+  it('getInstance is generic — returns Cache<V>', () => {
+    const c = Cache.getInstance<{ id: string }>();
+    expectTypeOf(c.get('x')).toEqualTypeOf<{ id: string } | undefined>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('createIsolated returns Cache<V>', () => {
+    const c = Cache.createIsolated<number>();
+    expectTypeOf(c.get('x')).toEqualTypeOf<number | undefined>();
+  });
+  it('set takes string key and V', () => {
+    const c = Cache.createIsolated<string>();
+    expectTypeOf(c.set).parameters.toEqualTypeOf<[string, string]>();
   });
 });
