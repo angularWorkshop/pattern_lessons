@@ -10,12 +10,11 @@ export class PostgresConnection implements Connection {
   public readonly engine: DbEngine = 'postgres';
   private _open = false;
 
-  // TODO: реализовать open / close / isOpen
   public open(): void {
-    throw new Error('PostgresConnection.open is not implemented yet');
+    this._open = true;
   }
   public close(): void {
-    throw new Error('PostgresConnection.close is not implemented yet');
+    this._open = false;
   }
   public isOpen(): boolean {
     return this._open;
@@ -25,28 +24,36 @@ export class PostgresConnection implements Connection {
 export class PostgresQueryRunner implements QueryRunner {
   public readonly engine: DbEngine = 'postgres';
 
-  // TODO: run должен принимать только PostgresConnection. Если в run прилетел
-  // foreign engine — кидать ошибку с упоминанием engine.
-  public run(_connection: Connection, _sql: string): readonly Record<string, unknown>[] {
-    throw new Error('PostgresQueryRunner.run is not implemented yet');
+  public run(connection: Connection, sql: string): readonly Record<string, unknown>[] {
+    if (connection.engine !== this.engine) {
+      throw new Error(
+        `PostgresQueryRunner cannot run on engine ${connection.engine} connection`,
+      );
+    }
+    return [{ engine: 'postgres', sql }];
   }
 }
 
 export class PostgresTransaction implements Transaction {
   public readonly engine: DbEngine = 'postgres';
+  private _active = false;
 
-  // TODO: begin/commit/rollback. begin принимает только postgres-connection.
-  public begin(_connection: Connection): void {
-    throw new Error('PostgresTransaction.begin is not implemented yet');
+  public begin(connection: Connection): void {
+    if (connection.engine !== this.engine) {
+      throw new Error(
+        `PostgresTransaction cannot begin on engine ${connection.engine} connection`,
+      );
+    }
+    this._active = true;
   }
   public commit(): void {
-    throw new Error('PostgresTransaction.commit is not implemented yet');
+    this._active = false;
   }
   public rollback(): void {
-    throw new Error('PostgresTransaction.rollback is not implemented yet');
+    this._active = false;
   }
   public isActive(): boolean {
-    return false;
+    return this._active;
   }
 }
 

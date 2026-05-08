@@ -11,10 +11,10 @@ export class SqliteConnection implements Connection {
   private _open = false;
 
   public open(): void {
-    throw new Error('SqliteConnection.open is not implemented yet');
+    this._open = true;
   }
   public close(): void {
-    throw new Error('SqliteConnection.close is not implemented yet');
+    this._open = false;
   }
   public isOpen(): boolean {
     return this._open;
@@ -24,25 +24,36 @@ export class SqliteConnection implements Connection {
 export class SqliteQueryRunner implements QueryRunner {
   public readonly engine: DbEngine = 'sqlite';
 
-  public run(_connection: Connection, _sql: string): readonly Record<string, unknown>[] {
-    throw new Error('SqliteQueryRunner.run is not implemented yet');
+  public run(connection: Connection, sql: string): readonly Record<string, unknown>[] {
+    if (connection.engine !== this.engine) {
+      throw new Error(
+        `SqliteQueryRunner cannot run on engine ${connection.engine} connection`,
+      );
+    }
+    return [{ engine: 'sqlite', sql }];
   }
 }
 
 export class SqliteTransaction implements Transaction {
   public readonly engine: DbEngine = 'sqlite';
+  private _active = false;
 
-  public begin(_connection: Connection): void {
-    throw new Error('SqliteTransaction.begin is not implemented yet');
+  public begin(connection: Connection): void {
+    if (connection.engine !== this.engine) {
+      throw new Error(
+        `SqliteTransaction cannot begin on engine ${connection.engine} connection`,
+      );
+    }
+    this._active = true;
   }
   public commit(): void {
-    throw new Error('SqliteTransaction.commit is not implemented yet');
+    this._active = false;
   }
   public rollback(): void {
-    throw new Error('SqliteTransaction.rollback is not implemented yet');
+    this._active = false;
   }
   public isActive(): boolean {
-    return false;
+    return this._active;
   }
 }
 

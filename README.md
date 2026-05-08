@@ -1,4 +1,4 @@
-# Topic 3 · Exercise 3.1 — Abstract Factory: семейства БД-объектов
+# Topic 3 · Exercise 3.1 — Abstract Factory: семейства БД-объектов · Solution
 
 В `src/postgres-factory.ts` и `src/sqlite-factory.ts` лежат фабрики для двух СУБД.
 Каждая создаёт три связанных объекта: `Connection`, `QueryRunner`, `Transaction`.
