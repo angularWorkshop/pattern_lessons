@@ -1,4 +1,4 @@
-# Topic 8 · Exercise 8.1 — Bridge: уведомления × каналы
+# Topic 8 · Exercise 8.1 — Bridge: уведомления × каналы · Solution
 
 Тип уведомления (Alert/Marketing/Reminder) — абстракция. Канал доставки (Email/SMS/Push) — реализация. Bridge = обе иерархии растут независимо. M × N комбинаций реализуются M + N классов.
 
