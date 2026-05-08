@@ -1,12 +1,16 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { VirtualList, type VisibleRow } from '../../src/virtual-list.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('VirtualList type contracts', () => {
+  it('scrollTo returns readonly VisibleRow<T>[]', () => {
+    const list = new VirtualList<number>([1, 2, 3], 1);
+    expectTypeOf(list.scrollTo(0)).toEqualTypeOf<readonly VisibleRow<number>[]>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('VisibleRow has nodeId, item, index', () => {
+    expectTypeOf<VisibleRow<string>>().toEqualTypeOf<{
+      nodeId: number;
+      item: string;
+      index: number;
+    }>();
   });
 });
