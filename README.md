@@ -1,53 +1,38 @@
-# pattern_lessons
+# Topic 2 · Exercise 2.1 — Factory Method для уведомлений
 
-Base repository for EduTec Design Patterns course exercises.
+В <code>src/dispatcher.ts</code> сидит классический switch по типу канала. Работает,
+но любое добавление нового канала — это правка <code>Dispatcher</code>. И это та самая
+история, ради которой существует Factory Method: вынести знание «какой класс создать
+для этого ключа» наружу, чтобы вызывающий код не разрастался if-ами.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+1. **Реализовать `NotificationFactory.create(channel)`** в `src/notification-factory.ts`.
+   Внутри — `Map<ChannelType, () =&gt; Notification>` с регистрацией всех четырёх
+   каналов. Возвращает свежий экземпляр нужного класса.
 
-The repository is intentionally framework-agnostic. It provides:
+2. **Добавить `TelegramNotification`** — новый файл `src/telegram-notification.ts`
+   с классом, реализующим интерфейс `Notification`. Канал `telegram`. Валидация
+   recipient: должен начинаться с `@` (например `@username`).
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+3. **Зарегистрировать Telegram в фабрике** — одна строка в `NotificationFactory`,
+   и больше нигде ничего не трогаем.
 
-## Production standard
+4. **Перевести `Dispatcher` на фабрику.** Внутри `dispatch` должно остаться
+   что-то вроде:
+   ```ts
+   const notification = this.factory.create(channel);
+   return notification.send(payload);
+   ```
+   Никакого switch.
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+5. Не забыть пробросить экспорт `TelegramNotification` через `src/index.ts`.
 
-Recommended workflow for a new exercise:
+## Критерии сдачи
 
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- `Dispatcher.dispatch` не содержит switch по каналу
+- Добавление нового канала требует только: новый файл с классом + одна строка в фабрике
+- Все тесты в `tests/unit/dispatcher.test.ts` зелёные (включая `telegram`)
+- Все тесты в `tests/unit/factory.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` проходит без ошибок
