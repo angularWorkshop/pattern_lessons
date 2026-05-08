@@ -1,12 +1,13 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { StripeAdapter } from '../../src/stripe-adapter.js';
+import { PayPalAdapter } from '../../src/paypal-adapter.js';
+import type { PaymentProvider } from '../../src/payment-provider.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Adapter type contracts', () => {
+  it('StripeAdapter implements PaymentProvider', () => {
+    expectTypeOf<StripeAdapter>().toMatchTypeOf<PaymentProvider>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('PayPalAdapter implements PaymentProvider', () => {
+    expectTypeOf<PayPalAdapter>().toMatchTypeOf<PaymentProvider>();
   });
 });
