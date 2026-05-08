@@ -1,12 +1,14 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { AudioPlayer } from '../../src/audio-player.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
-  });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+describe('AudioPlayer facade type contracts', () => {
+  it('public API surface is exactly load/play/pause/setVolume/getState/getVolume', () => {
+    expectTypeOf(AudioPlayer.prototype.load).parameters.toEqualTypeOf<[string]>();
+    expectTypeOf(AudioPlayer.prototype.load).returns.toEqualTypeOf<Promise<void>>();
+    expectTypeOf(AudioPlayer.prototype.play).returns.toEqualTypeOf<Promise<void>>();
+    expectTypeOf(AudioPlayer.prototype.pause).returns.toEqualTypeOf<Promise<void>>();
+    expectTypeOf(AudioPlayer.prototype.setVolume).parameters.toEqualTypeOf<[number]>();
+    expectTypeOf(AudioPlayer.prototype.getState).returns.toEqualTypeOf<'idle' | 'playing' | 'paused'>();
+    expectTypeOf(AudioPlayer.prototype.getVolume).returns.toEqualTypeOf<number>();
   });
 });

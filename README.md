@@ -1,53 +1,27 @@
-# pattern_lessons
+# Topic 11 · Exercise 11.1 — Facade: AudioPlayer над Web Audio API
 
-Base repository for EduTec Design Patterns course exercises.
+Web Audio API из коробки — пять разных классов с непростыми зависимостями. `AudioPlayer` прячет всё это за четыре простых метода.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/audio-player.ts` реализуй:
 
-The repository is intentionally framework-agnostic. It provides:
+- `load(url)` — `await context.decodeAudioData(url)`, сохранить в `currentBuffer`
+- `play()`:
+  - если `context.state === 'suspended'` → `await context.resume()`
+  - если `currentBuffer` пуст — кинуть с понятным сообщением
+  - создать source через `context.createBufferSource()`, выставить `source.buffer = currentBuffer`
+  - `source.connect(this.gain)` и `source.start()`
+  - сохранить в `currentSource`, состояние = `'playing'`
+- `pause()` — `await context.suspend()`, состояние = `'paused'`
+- `setVolume(v)` — `this.gain.gain = clamp(v, 0, 1)`
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+## Критерии сдачи
 
-## Production standard
+- 8 тестов в `tests/unit/audio-player.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` зелёный
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+## Главное
 
-Recommended workflow for a new exercise:
-
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+Снаружи AudioPlayer — это только load/play/pause/setVolume + два геттера. Внутри — четыре класса Web Audio API, и весь оркестр между ними прячется. Это и есть Facade.
