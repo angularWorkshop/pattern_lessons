@@ -1,12 +1,13 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { reactive, effect } from '../../src/reactive.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('reactive type contracts', () => {
+  it('reactive(obj) returns the same type', () => {
+    const r = reactive({ count: 0 });
+    expectTypeOf(r).toEqualTypeOf<{ count: number }>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('effect returns a cleanup function', () => {
+    const cleanup = effect(() => {});
+    expectTypeOf(cleanup).toEqualTypeOf<() => void>();
   });
 });

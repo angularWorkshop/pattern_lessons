@@ -1,53 +1,31 @@
-# pattern_lessons
+# Topic 13 · Exercise 13.2 — Reactive прокси (мини-Vue)
 
-Base repository for EduTec Design Patterns course exercises.
+Реализуй упрощённую реактивность на JS Proxy. `reactive(obj)` возвращает прокси, `effect(fn)` запускает функцию и автоматически подписывается на использованные поля. Когда поле меняется — все зависимые effect-ы пересчитываются.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/reactive.ts`:
 
-The repository is intentionally framework-agnostic. It provides:
+1. Глобальный модульный state:
+   - `let currentEffect: (() => void) | null = null`
+   - `const depsMap = new WeakMap<object, Map<PropertyKey, Set<() => void>>>()`
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+2. `reactive(target)` возвращает `new Proxy(target, { get, set })`:
+   - `get`: если `currentEffect` установлен — добавить в `Set` для (target, prop). Вернуть `Reflect.get(target, prop, receiver)`
+   - `set`: записать через `Reflect.set`, потом по копии Set'а вызвать все effect-ы (защита от инфинита — клонируй Set перед обходом)
 
-## Production standard
+3. `effect(fn)`:
+   - Сохранить старый `currentEffect`, поставить fn
+   - Вызвать fn (внутри он обратится к полям и они затрекаются)
+   - Восстановить старый currentEffect
+   - Вернуть cleanup-функцию: пройти по всем Set'ам в depsMap и удалить fn
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+## Защита от циклов
 
-Recommended workflow for a new exercise:
+Если effect внутри читает И пишет в одно и то же поле, без защиты получится бесконечный цикл. Простейшая защита: при триггере не вызывать effect, который сейчас уже исполняется. Можно проверить `if (e !== currentEffect)`.
 
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
+## Критерии сдачи
 
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- 9 тестов в `tests/unit/reactive.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` зелёный
