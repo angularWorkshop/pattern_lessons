@@ -9,27 +9,22 @@ import type {
 
 export class LightButton implements Button {
   public readonly theme: Theme = 'light';
-  // TODO: render должен вернуть RenderedNode с tag='button',
-  // className='btn btn--light' и text=label.
-  public render(_label: string): RenderedNode {
-    throw new Error('LightButton.render is not implemented yet');
+  public render(label: string): RenderedNode {
+    return { tag: 'button', className: 'btn btn--light', text: label, theme: 'light' };
   }
 }
 
 export class LightInput implements Input {
   public readonly theme: Theme = 'light';
-  // TODO: tag='input', className='input input--light', text=placeholder.
-  public render(_placeholder: string): RenderedNode {
-    throw new Error('LightInput.render is not implemented yet');
+  public render(placeholder: string): RenderedNode {
+    return { tag: 'input', className: 'input input--light', text: placeholder, theme: 'light' };
   }
 }
 
 export class LightCard implements Card {
   public readonly theme: Theme = 'light';
-  // TODO: tag='div', className='card card--light',
-  // text='<title> :: <body>'.
-  public render(_title: string, _body: string): RenderedNode {
-    throw new Error('LightCard.render is not implemented yet');
+  public render(title: string, body: string): RenderedNode {
+    return { tag: 'div', className: 'card card--light', text: `${title} :: ${body}`, theme: 'light' };
   }
 }
 

@@ -9,22 +9,22 @@ import type {
 
 export class DarkButton implements Button {
   public readonly theme: Theme = 'dark';
-  public render(_label: string): RenderedNode {
-    throw new Error('DarkButton.render is not implemented yet');
+  public render(label: string): RenderedNode {
+    return { tag: 'button', className: 'btn btn--dark', text: label, theme: 'dark' };
   }
 }
 
 export class DarkInput implements Input {
   public readonly theme: Theme = 'dark';
-  public render(_placeholder: string): RenderedNode {
-    throw new Error('DarkInput.render is not implemented yet');
+  public render(placeholder: string): RenderedNode {
+    return { tag: 'input', className: 'input input--dark', text: placeholder, theme: 'dark' };
   }
 }
 
 export class DarkCard implements Card {
   public readonly theme: Theme = 'dark';
-  public render(_title: string, _body: string): RenderedNode {
-    throw new Error('DarkCard.render is not implemented yet');
+  public render(title: string, body: string): RenderedNode {
+    return { tag: 'div', className: 'card card--dark', text: `${title} :: ${body}`, theme: 'dark' };
   }
 }
 
