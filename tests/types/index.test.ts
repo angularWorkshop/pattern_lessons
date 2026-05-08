@@ -1,12 +1,14 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { deepClone } from '../../src/deep-clone.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('deepClone type contract', () => {
+  it('returns the same type as the input', () => {
+    expectTypeOf(deepClone({ a: 1 })).toEqualTypeOf<{ a: number }>();
+    expectTypeOf(deepClone([1, 2, 3])).toEqualTypeOf<number[]>();
+    expectTypeOf(deepClone(new Date())).toEqualTypeOf<Date>();
+    expectTypeOf(deepClone(new Map<string, number>())).toEqualTypeOf<Map<string, number>>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('preserves nested generic types', () => {
+    expectTypeOf(deepClone({ items: [{ id: 'x' }] })).toEqualTypeOf<{ items: { id: string }[] }>();
   });
 });
