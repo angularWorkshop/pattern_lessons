@@ -1,23 +1,67 @@
-// Мини-Vue: reactive(obj) и effect(fn) на встроенном JS Proxy.
-//
-// Идея:
-// - reactive(obj) возвращает Proxy. На read трекаем зависимость от current effect.
-// - effect(fn) выставляет себя как current, вызывает fn (тот читает поля, они трекаются),
-//   снимает себя. Когда поля меняются (через set), вызываем все зависимые effect-ы.
-//
-// TODO: реализовать:
-// 1. Глобальный `let currentEffect: (() => void) | null = null`
-// 2. Глобальная WeakMap<object, Map<PropertyKey, Set<() => void>>> — depsMap
-// 3. reactive(target) — возвращает Proxy с обработчиками:
-//    - get: если currentEffect — добавить его в depsMap для (target, prop). Вернуть значение
-//    - set: записать значение, потом запустить все effect-ы из depsMap для (target, prop)
-// 4. effect(fn): сохранить currentEffect, вызвать fn, восстановить currentEffect.
-//    Вернуть функцию-cleanup, которая удалит эффект из всех Set.
+type EffectFn = () => void;
 
-export function reactive<T extends object>(_target: T): T {
-  throw new Error('reactive is not implemented yet');
+interface ActiveEffect {
+  fn: EffectFn;
+  deps: Set<Set<EffectFn>>;
 }
 
-export function effect(_fn: () => void): () => void {
-  throw new Error('effect is not implemented yet');
+let currentEffect: ActiveEffect | null = null;
+const depsMap = new WeakMap<object, Map<PropertyKey, Set<EffectFn>>>();
+
+function track(target: object, key: PropertyKey): void {
+  if (!currentEffect) return;
+  let perTarget = depsMap.get(target);
+  if (!perTarget) {
+    perTarget = new Map();
+    depsMap.set(target, perTarget);
+  }
+  let perKey = perTarget.get(key);
+  if (!perKey) {
+    perKey = new Set();
+    perTarget.set(key, perKey);
+  }
+  perKey.add(currentEffect.fn);
+  currentEffect.deps.add(perKey);
+}
+
+function trigger(target: object, key: PropertyKey): void {
+  const perTarget = depsMap.get(target);
+  if (!perTarget) return;
+  const perKey = perTarget.get(key);
+  if (!perKey) return;
+  for (const effectFn of [...perKey]) {
+    if (currentEffect && effectFn === currentEffect.fn) continue;
+    effectFn();
+  }
+}
+
+export function reactive<T extends object>(target: T): T {
+  return new Proxy(target, {
+    get(t, key, receiver): unknown {
+      track(t, key);
+      return Reflect.get(t, key, receiver);
+    },
+    set(t, key, value, receiver): boolean {
+      const ok = Reflect.set(t, key, value, receiver);
+      trigger(t, key);
+      return ok;
+    },
+  });
+}
+
+export function effect(fn: EffectFn): () => void {
+  const active: ActiveEffect = { fn, deps: new Set() };
+  const previous = currentEffect;
+  currentEffect = active;
+  try {
+    fn();
+  } finally {
+    currentEffect = previous;
+  }
+  return () => {
+    for (const dep of active.deps) {
+      dep.delete(fn);
+    }
+    active.deps.clear();
+  };
 }
