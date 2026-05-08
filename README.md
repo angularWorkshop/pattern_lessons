@@ -1,4 +1,4 @@
-# Topic 10 · Exercise 10.2 — Decorator класса: @cache
+# Topic 10 · Exercise 10.2 — Decorator класса: @cache · Solution
 
 Реализуй TS Stage 3 method decorator `@cache`, который кэширует результаты метода по аргументам. Кэш — отдельный на каждый экземпляр класса.
 
