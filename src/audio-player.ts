@@ -5,20 +5,9 @@ import {
   type FakeGainNode,
 } from './audio-internals.js';
 
-// Facade: AudioPlayer прячет за собой 4 класса Web Audio API.
-// Снаружи — четыре простых метода: load, play, pause, setVolume.
-//
-// TODO: реализовать. State держим внутри:
-// - context: FakeAudioContext (создаём в конструкторе)
-// - gain: FakeGainNode (создаём один раз, connect к 'destination')
-// - currentBuffer: FakeAudioBuffer | null
-// - currentSource: FakeAudioBufferSourceNode | null
-// - state: 'idle' | 'playing' | 'paused'
-//
-// load(url) — async: decodeAudioData → сохраняем currentBuffer.
-// play() — async: если context.suspended → resume; создаём source, buffer, connect к gain, start.
-// pause() — context.suspend.
-// setVolume(v) — gain.gain = v (clamp 0..1).
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(max, Math.max(min, value));
+
 export class AudioPlayer {
   private readonly context: FakeAudioContext;
   private readonly gain: FakeGainNode;
@@ -32,20 +21,32 @@ export class AudioPlayer {
     this.gain.connect('destination');
   }
 
-  public async load(_url: string): Promise<void> {
-    throw new Error('AudioPlayer.load is not implemented yet');
+  public async load(url: string): Promise<void> {
+    this.currentBuffer = await this.context.decodeAudioData(url);
   }
 
   public async play(): Promise<void> {
-    throw new Error('AudioPlayer.play is not implemented yet');
+    if (!this.currentBuffer) {
+      throw new Error('AudioPlayer.play: no buffer loaded — call load() first');
+    }
+    if (this.context.state === 'suspended') {
+      await this.context.resume();
+    }
+    const source = this.context.createBufferSource();
+    source.buffer = this.currentBuffer;
+    source.connect(this.gain);
+    source.start();
+    this.currentSource = source;
+    this.state = 'playing';
   }
 
   public async pause(): Promise<void> {
-    throw new Error('AudioPlayer.pause is not implemented yet');
+    await this.context.suspend();
+    this.state = 'paused';
   }
 
-  public setVolume(_value: number): void {
-    throw new Error('AudioPlayer.setVolume is not implemented yet');
+  public setVolume(value: number): void {
+    this.gain.gain = clamp(value, 0, 1);
   }
 
   public getState(): 'idle' | 'playing' | 'paused' {

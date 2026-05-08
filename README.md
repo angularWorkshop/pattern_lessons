@@ -1,4 +1,4 @@
-# Topic 11 · Exercise 11.1 — Facade: AudioPlayer над Web Audio API
+# Topic 11 · Exercise 11.1 — Facade: AudioPlayer над Web Audio API · Solution
 
 Web Audio API из коробки — пять разных классов с непростыми зависимостями. `AudioPlayer` прячет всё это за четыре простых метода.
 
