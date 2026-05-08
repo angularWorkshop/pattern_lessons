@@ -1,12 +1,18 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { promisify } from '../../src/promisify.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('promisify type contracts', () => {
+  it('returns a function with the same args (sans callback) returning Promise<R>', () => {
+    const fn = (a: number, b: number, cb: (err: Error | null, r?: string) => void): void => cb(null, `${a + b}`);
+    const wrapped = promisify(fn);
+    expectTypeOf(wrapped).parameters.toEqualTypeOf<[number, number]>();
+    expectTypeOf(wrapped).returns.toEqualTypeOf<Promise<string>>();
   });
 
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('zero-arg case', () => {
+    const fn = (cb: (err: Error | null, r?: number) => void): void => cb(null, 1);
+    const wrapped = promisify(fn);
+    expectTypeOf(wrapped).parameters.toEqualTypeOf<[]>();
+    expectTypeOf(wrapped).returns.toEqualTypeOf<Promise<number>>();
   });
 });
