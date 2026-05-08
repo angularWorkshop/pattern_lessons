@@ -1,4 +1,4 @@
-# Topic 13 · Exercise 13.1 — Proxy: lazy-loading
+# Topic 13 · Exercise 13.1 — Proxy: lazy-loading · Solution
 
 `createLazy(factory)` возвращает прокси-объект, у которого тяжёлая инициализация откладывается до первого реального обращения. Снаружи объект «уже готов», а на самом деле фабрика ещё не вызвана.
 
