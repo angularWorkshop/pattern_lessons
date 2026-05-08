@@ -1,12 +1,17 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { File, Folder, type FsNode } from '../../src/fs-node.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Composite type contracts', () => {
+  it('File implements FsNode', () => {
+    expectTypeOf<File>().toMatchTypeOf<FsNode>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('Folder implements FsNode', () => {
+    expectTypeOf<Folder>().toMatchTypeOf<FsNode>();
+  });
+  it('getTotalSize returns number on every node', () => {
+    expectTypeOf<FsNode['getTotalSize']>().returns.toEqualTypeOf<number>();
+  });
+  it('findByName returns a readonly list of FsNode', () => {
+    expectTypeOf<FsNode['findByName']>().returns.toEqualTypeOf<readonly FsNode[]>();
   });
 });
