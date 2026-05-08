@@ -1,4 +1,4 @@
-# Topic 4 · Exercise 4.1 — Builder для SQL-запроса
+# Topic 4 · Exercise 4.1 — Builder для SQL-запроса · Solution
 
 Сделать fluent API для сборки SELECT-запроса. Каждый метод возвращает builder, в конце `toSQL()` собирает строку и массив параметров для placeholder'ов `$1, $2, ...`.
 

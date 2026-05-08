@@ -24,30 +24,58 @@ export class QueryBuilder {
   protected orders: OrderClause[] = [];
   protected limitCount: number | null = null;
 
-  // TODO: каждый метод сохраняет состояние и возвращает this (fluent API).
-  // toSQL собирает строку с параметрами вида $1, $2 ... и возвращает их в массиве.
-
-  public select(..._columns: string[]): this {
-    throw new Error('QueryBuilder.select is not implemented yet');
+  public select(...columns: string[]): this {
+    this.columns = columns;
+    return this;
   }
 
-  public from(_table: string): this {
-    throw new Error('QueryBuilder.from is not implemented yet');
+  public from(table: string): this {
+    this.table = table;
+    return this;
   }
 
-  public where(_column: string, _op: ComparisonOp, _value: unknown): this {
-    throw new Error('QueryBuilder.where is not implemented yet');
+  public where(column: string, op: ComparisonOp, value: unknown): this {
+    this.wheres.push({ column, op, value });
+    return this;
   }
 
-  public orderBy(_column: string, _direction: OrderDirection = 'ASC'): this {
-    throw new Error('QueryBuilder.orderBy is not implemented yet');
+  public orderBy(column: string, direction: OrderDirection = 'ASC'): this {
+    this.orders.push({ column, direction });
+    return this;
   }
 
-  public limit(_count: number): this {
-    throw new Error('QueryBuilder.limit is not implemented yet');
+  public limit(count: number): this {
+    this.limitCount = count;
+    return this;
   }
 
   public toSQL(): SqlOutput {
-    throw new Error('QueryBuilder.toSQL is not implemented yet');
+    if (!this.table) {
+      throw new Error('QueryBuilder: from() must be called before toSQL()');
+    }
+
+    const params: unknown[] = [];
+    const columnList = this.columns.length === 0 ? '*' : this.columns.join(', ');
+    const parts: string[] = [`SELECT ${columnList} FROM ${this.table}`];
+
+    if (this.wheres.length > 0) {
+      const whereParts = this.wheres.map((w) => {
+        params.push(w.value);
+        return `${w.column} ${w.op} $${params.length}`;
+      });
+      parts.push(`WHERE ${whereParts.join(' AND ')}`);
+    }
+
+    if (this.orders.length > 0) {
+      const orderParts = this.orders.map((o) => `${o.column} ${o.direction}`);
+      parts.push(`ORDER BY ${orderParts.join(', ')}`);
+    }
+
+    if (this.limitCount !== null) {
+      params.push(this.limitCount);
+      parts.push(`LIMIT $${params.length}`);
+    }
+
+    return { sql: parts.join(' '), params };
   }
 }
