@@ -1,12 +1,10 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { compose, type Middleware, type RequestContext } from '../../src/middleware.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
-  });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+describe('compose type contracts', () => {
+  it('compose takes a readonly Middleware[] and returns (ctx) => Promise<void>', () => {
+    expectTypeOf(compose).parameters.toEqualTypeOf<[readonly Middleware[]]>();
+    expectTypeOf(compose([])).parameters.toEqualTypeOf<[RequestContext]>();
+    expectTypeOf(compose([])).returns.toEqualTypeOf<Promise<void>>();
   });
 });
