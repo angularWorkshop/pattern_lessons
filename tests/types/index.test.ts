@@ -1,12 +1,11 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { TimedService } from '../../src/timed-service.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('@measure preserves method signatures', () => {
+  it('syncTask still returns number', () => {
+    expectTypeOf(TimedService.prototype.syncTask).returns.toEqualTypeOf<number>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('asyncTask still returns Promise<string>', () => {
+    expectTypeOf(TimedService.prototype.asyncTask).returns.toEqualTypeOf<Promise<string>>();
   });
 });
