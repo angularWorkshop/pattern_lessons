@@ -1,4 +1,4 @@
-# Topic 5 · Exercise 5.1 — deepClone руками
+# Topic 5 · Exercise 5.1 — deepClone руками · Solution
 
 Реализовать `deepClone<T>(value: T): T` без `structuredClone`. Должна корректно обрабатывать примитивы, массивы, объекты, Date, Map, Set и циклические ссылки.
 
