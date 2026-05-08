@@ -1,53 +1,60 @@
-# pattern_lessons
+# Topic 2 · Exercise 2.2 — Factory Method для парсеров с runtime-регистрацией
 
-Base repository for EduTec Design Patterns course exercises.
+`DocumentLoader` сейчас содержит switch по mime-формату. Парсеров три (CSV, JSON, XML),
+все работают. Тесты требуют четвёртый — YAML — но не как ещё одну hardcoded ветку.
+Цель упражнения — построить фабрику, в которую новый формат можно «подключить»
+снаружи, без правки самой фабрики или DocumentLoader.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+1. **Реализовать `ParserFactory`** в `src/parser-factory.ts`:
+   - внутри — `Map<ParserFormat, () =&gt; Parser>` с дефолтной регистрацией `csv`, `json`, `xml`
+   - метод `create(format)` возвращает свежий парсер из `Map`, на отсутствующий формат — `throw` с упоминанием формата в сообщении
+   - метод `register(format, factory)` добавляет/перезаписывает запись в реестре
+   - обе сигнатуры строго типизированы под `ParserFormat`
 
-The repository is intentionally framework-agnostic. It provides:
+2. **Создать `YamlParser`** в `src/yaml-parser.ts` — реализует интерфейс `Parser`,
+   формат `'yaml'`. Минимальная реализация: разбирает строки вида `key: value`
+   в простой объект `Record<string, string>`. Непарсимые строки идут в `warnings`.
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+3. **Перевести `DocumentLoader` на фабрику.** Конструктор принимает
+   `factory: ParserFactory = new ParserFactory()`. `load(format, text)` —
+   делегирует в `this.factory.create(format).parse(text)`. Никакого switch.
 
-## Production standard
+4. Не забыть пробросить экспорт `YamlParser` через `src/index.ts`.
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+## Контракт после рефакторинга
 
-Recommended workflow for a new exercise:
+```ts
+// document-loader.ts
+export class DocumentLoader {
+  private readonly factory: ParserFactory;
 
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
+  public constructor(factory: ParserFactory = new ParserFactory()) {
+    this.factory = factory;
+  }
 
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
+  public load(format: ParserFormat, text: string): ParserResult {
+    return this.factory.create(format).parse(text);
+  }
+}
 ```
+
+И регистрация YAML живёт в тестовом коде:
+
+```ts
+const factory = new ParserFactory();
+factory.register('yaml', () => new YamlParser());
+const loader = new DocumentLoader(factory);
+loader.load('yaml', 'name: Max');
+```
+
+## Критерии сдачи
+
+- В `DocumentLoader` нет switch/if по формату
+- Дефолтный `ParserFactory` знает про csv/json/xml сразу — это всё ещё Factory Method, не голый `Map`
+- YamlParser существует, но не зарегистрирован по умолчанию — его регистрирует внешний код
+- Все тесты в `tests/unit/factory.test.ts` зелёные
+- Все тесты в `tests/unit/document-loader.test.ts` зелёные (включая yaml-кейс)
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` проходит без ошибок
