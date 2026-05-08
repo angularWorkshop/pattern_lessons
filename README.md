@@ -1,4 +1,4 @@
-# Topic 5 · Exercise 5.2 — HistoryStack для undo/redo
+# Topic 5 · Exercise 5.2 — HistoryStack для undo/redo · Solution
 
 Реализовать `HistoryStack<T>` через клонирование снапшотов. На каждый `push` снимаем копию состояния — чтобы потом `undo` вернул именно ту версию, что была в момент пуша, а не «текущее» состояние, которое мог кто-то мутировать снаружи.
 

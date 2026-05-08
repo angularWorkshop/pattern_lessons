@@ -1,36 +1,38 @@
-// HistoryStack — undo/redo через клонирование (Prototype-применение).
-// Каждый push снимает снапшот текущего состояния, чтобы потом undo
-// мог вернуть именно ту версию, какой состояние было на момент push.
-
-// TODO: реализовать класс. Внутри — два стека: undoStack и redoStack.
-// На push: складываем клон текущего состояния в undoStack, redoStack чистим.
-// На undo: вытаскиваем клон из undoStack, текущее в redoStack, возвращаем клон.
-// На redo: симметрично — вытаскиваем из redoStack, текущее в undoStack.
-//
-// canUndo / canRedo помогают UI понимать доступность кнопок.
 export class HistoryStack<T> {
   protected current: T;
   protected undoStack: T[] = [];
   protected redoStack: T[] = [];
 
   public constructor(initial: T) {
-    this.current = initial;
+    this.current = structuredClone(initial);
   }
 
   public getState(): T {
-    throw new Error('HistoryStack.getState is not implemented yet');
+    return structuredClone(this.current);
   }
 
-  public push(_state: T): void {
-    throw new Error('HistoryStack.push is not implemented yet');
+  public push(state: T): void {
+    this.undoStack.push(structuredClone(this.current));
+    this.current = structuredClone(state);
+    this.redoStack.length = 0;
   }
 
   public undo(): T {
-    throw new Error('HistoryStack.undo is not implemented yet');
+    if (this.undoStack.length === 0) {
+      throw new Error('HistoryStack.undo: nothing to undo');
+    }
+    this.redoStack.push(structuredClone(this.current));
+    this.current = this.undoStack.pop() as T;
+    return structuredClone(this.current);
   }
 
   public redo(): T {
-    throw new Error('HistoryStack.redo is not implemented yet');
+    if (this.redoStack.length === 0) {
+      throw new Error('HistoryStack.redo: nothing to redo');
+    }
+    this.undoStack.push(structuredClone(this.current));
+    this.current = this.redoStack.pop() as T;
+    return structuredClone(this.current);
   }
 
   public canUndo(): boolean {
