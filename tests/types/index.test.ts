@@ -1,12 +1,22 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { evaluate } from '../../src/evaluate.js';
+import { prettyPrint } from '../../src/pretty-print.js';
+import type { Env, Expr } from '../../src/expr.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('AST type contracts', () => {
+  it('Expr is the expected discriminated union', () => {
+    expectTypeOf<Expr>().toEqualTypeOf<
+      | { kind: 'num'; value: number }
+      | { kind: 'var'; name: string }
+      | { kind: 'binop'; op: '+' | '-' | '*' | '/'; left: Expr; right: Expr }
+    >();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('evaluate takes Expr and Env, returns number', () => {
+    expectTypeOf(evaluate).parameters.toEqualTypeOf<[Expr, Env]>();
+    expectTypeOf(evaluate).returns.toEqualTypeOf<number>();
+  });
+  it('prettyPrint takes Expr, returns string', () => {
+    expectTypeOf(prettyPrint).parameters.toEqualTypeOf<[Expr]>();
+    expectTypeOf(prettyPrint).returns.toEqualTypeOf<string>();
   });
 });
