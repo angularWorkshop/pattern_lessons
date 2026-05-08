@@ -5,9 +5,6 @@ export interface EmailMessage {
   attachments: readonly { name: string; content: string }[];
 }
 
-// Стартовое состояние — пустой объект; финальное — {to: true; subject: true}.
-// Каждый вызов to() / subject() добавляет соответствующий флаг через
-// type intersection. build() требует наличия обоих флагов.
 export type EmailComplete = { to: true; subject: true };
 
 export class EmailBuilder<S extends Partial<EmailComplete> = Record<string, never>> {
@@ -17,26 +14,32 @@ export class EmailBuilder<S extends Partial<EmailComplete> = Record<string, neve
   protected _attachments: { name: string; content: string }[] = [];
   protected readonly __state!: S;
 
-  // TODO: сохранить адрес и сузить тип через cast.
-  public to(_address: string): EmailBuilder<S & { to: true }> {
-    throw new Error('EmailBuilder.to is not implemented yet');
+  public to(address: string): EmailBuilder<S & { to: true }> {
+    this._to = address;
+    return this as unknown as EmailBuilder<S & { to: true }>;
   }
 
-  public subject(_text: string): EmailBuilder<S & { subject: true }> {
-    throw new Error('EmailBuilder.subject is not implemented yet');
+  public subject(text: string): EmailBuilder<S & { subject: true }> {
+    this._subject = text;
+    return this as unknown as EmailBuilder<S & { subject: true }>;
   }
 
-  public cc(_address: string): this {
-    throw new Error('EmailBuilder.cc is not implemented yet');
+  public cc(address: string): this {
+    this._cc.push(address);
+    return this;
   }
 
-  public attachment(_name: string, _content: string): this {
-    throw new Error('EmailBuilder.attachment is not implemented yet');
+  public attachment(name: string, content: string): this {
+    this._attachments.push({ name, content });
+    return this;
   }
 
-  // ВАЖНО: this: EmailBuilder<EmailComplete> — TypeScript разрешит build()
-  // только когда S расширяет {to: true; subject: true}.
   public build(this: EmailBuilder<EmailComplete>): EmailMessage {
-    throw new Error('EmailBuilder.build is not implemented yet');
+    return {
+      to: this._to as string,
+      subject: this._subject as string,
+      cc: [...this._cc],
+      attachments: [...this._attachments],
+    };
   }
 }

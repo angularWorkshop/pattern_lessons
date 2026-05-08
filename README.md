@@ -1,4 +1,4 @@
-# Topic 4 · Exercise 4.3 — Step Builder с типобезопасностью
+# Topic 4 · Exercise 4.3 — Step Builder с типобезопасностью · Solution
 
 Step Builder — это Builder, который трекает обязательные шаги через систему типов. Цель: <code>build()</code> компилируется только когда все обязательные шаги пройдены, иначе TS-ошибка.
 
