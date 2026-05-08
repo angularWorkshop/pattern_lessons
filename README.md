@@ -1,4 +1,4 @@
-# Topic 14 · Exercise 14.1 — Chain of Responsibility: middleware
+# Topic 14 · Exercise 14.1 — Chain of Responsibility: middleware · Solution
 
 Реализуй движок middleware в стиле Express/Koa. Запрос проходит через цепочку обработчиков, каждый решает: пропустить дальше через `next()`, прервать цепочку (не вызвать `next`), или кинуть ошибку.
 
