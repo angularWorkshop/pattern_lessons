@@ -1,5 +1,3 @@
-// Composite: и File, и Folder реализуют общий интерфейс FsNode.
-// Любой обход (размер, поиск) работает одинаково на листе и на группе.
 export interface FsNode {
   readonly name: string;
   getTotalSize(): number;
@@ -15,14 +13,12 @@ export class File implements FsNode {
     this.size = size;
   }
 
-  // TODO: getTotalSize возвращает this.size
   public getTotalSize(): number {
-    throw new Error('File.getTotalSize is not implemented yet');
+    return this.size;
   }
 
-  // TODO: findByName возвращает [this] если name совпадает, иначе []
-  public findByName(_name: string): readonly FsNode[] {
-    throw new Error('File.findByName is not implemented yet');
+  public findByName(name: string): readonly FsNode[] {
+    return this.name === name ? [this] : [];
   }
 }
 
@@ -39,14 +35,18 @@ export class Folder implements FsNode {
     this.children.push(node);
   }
 
-  // TODO: getTotalSize рекурсивно суммирует размеры детей
   public getTotalSize(): number {
-    throw new Error('Folder.getTotalSize is not implemented yet');
+    return this.children.reduce((sum, child) => sum + child.getTotalSize(), 0);
   }
 
-  // TODO: findByName ищет рекурсивно во всех детях.
-  // Если имя самой папки совпадает — папка тоже идёт в результат.
-  public findByName(_name: string): readonly FsNode[] {
-    throw new Error('Folder.findByName is not implemented yet');
+  public findByName(name: string): readonly FsNode[] {
+    const results: FsNode[] = [];
+    if (this.name === name) {
+      results.push(this);
+    }
+    for (const child of this.children) {
+      results.push(...child.findByName(name));
+    }
+    return results;
   }
 }
