@@ -1,9 +1,13 @@
 import type { PaymentProvider, PaymentResult } from './payment-provider.js';
+import type { PayPalPayment } from './paypal-sdk.js';
 import { PayPalSDK } from './paypal-sdk.js';
 
-// TODO: обернуть PayPalSDK под PaymentProvider.
-// pay → createPayment, cancel → cancelPayment.
-// Переводить APPROVED → 'paid', CANCELLED → 'cancelled', FAILED → 'failed'.
+const STATE_TO_STATUS: Record<PayPalPayment['state'], PaymentResult['status']> = {
+  APPROVED: 'paid',
+  CANCELLED: 'cancelled',
+  FAILED: 'failed',
+};
+
 export class PayPalAdapter implements PaymentProvider {
   private readonly sdk: PayPalSDK;
 
@@ -11,11 +15,23 @@ export class PayPalAdapter implements PaymentProvider {
     this.sdk = sdk;
   }
 
-  public async pay(_amount: number, _currency: string): Promise<PaymentResult> {
-    throw new Error('PayPalAdapter.pay is not implemented yet');
+  public async pay(amount: number, currency: string): Promise<PaymentResult> {
+    const payment = await this.sdk.createPayment(amount, currency);
+    return this.toResult(payment);
   }
 
-  public async cancel(_id: string): Promise<PaymentResult> {
-    throw new Error('PayPalAdapter.cancel is not implemented yet');
+  public async cancel(id: string): Promise<PaymentResult> {
+    const payment = await this.sdk.cancelPayment(id);
+    return this.toResult(payment);
+  }
+
+  private toResult(payment: PayPalPayment): PaymentResult {
+    return {
+      id: payment.paymentId,
+      provider: 'paypal',
+      status: STATE_TO_STATUS[payment.state],
+      amount: payment.total,
+      currency: payment.currency,
+    };
   }
 }

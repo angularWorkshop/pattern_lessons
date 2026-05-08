@@ -1,9 +1,6 @@
 import type { PaymentProvider, PaymentResult } from './payment-provider.js';
 import { StripeSDK } from './stripe-sdk.js';
 
-// TODO: обернуть StripeSDK так, чтобы класс реализовывал PaymentProvider.
-// pay(amount, currency) — позвать sdk.charge, превратить ответ в PaymentResult.
-// cancel(id) — позвать sdk.refund, превратить ответ.
 export class StripeAdapter implements PaymentProvider {
   private readonly sdk: StripeSDK;
 
@@ -11,11 +8,25 @@ export class StripeAdapter implements PaymentProvider {
     this.sdk = sdk;
   }
 
-  public async pay(_amount: number, _currency: string): Promise<PaymentResult> {
-    throw new Error('StripeAdapter.pay is not implemented yet');
+  public async pay(amount: number, currency: string): Promise<PaymentResult> {
+    const response = await this.sdk.charge(amount, currency);
+    return {
+      id: response.charge_id,
+      provider: 'stripe',
+      status: response.charged ? 'paid' : 'failed',
+      amount: response.amount_cents,
+      currency: response.currency_code,
+    };
   }
 
-  public async cancel(_id: string): Promise<PaymentResult> {
-    throw new Error('StripeAdapter.cancel is not implemented yet');
+  public async cancel(id: string): Promise<PaymentResult> {
+    const response = await this.sdk.refund(id);
+    return {
+      id: response.charge_id,
+      provider: 'stripe',
+      status: response.refunded ? 'cancelled' : 'failed',
+      amount: 0,
+      currency: '',
+    };
   }
 }

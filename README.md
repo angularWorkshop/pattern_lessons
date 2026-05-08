@@ -1,4 +1,4 @@
-# Topic 7 · Exercise 7.1 — Adapter для платёжек
+# Topic 7 · Exercise 7.1 — Adapter для платёжек · Solution
 
 Stripe и PayPal — два разных SDK с разными API. Высокоуровневый код не должен знать про их различия. Adapter оборачивает каждый под общий интерфейс `PaymentProvider`.
 
