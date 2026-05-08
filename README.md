@@ -1,53 +1,27 @@
-# pattern_lessons
+# Topic 10 · Exercise 10.2 — Decorator класса: @cache
 
-Base repository for EduTec Design Patterns course exercises.
+Реализуй TS Stage 3 method decorator `@cache`, который кэширует результаты метода по аргументам. Кэш — отдельный на каждый экземпляр класса.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/cache-decorator.ts`:
 
-The repository is intentionally framework-agnostic. It provides:
+- Сигнатура декоратора Stage 3:
+  ```ts
+  function cache<T extends object, A extends unknown[], R>(
+    originalMethod: (this: T, ...args: A) => R,
+    context: ClassMethodDecoratorContext<T, (this: T, ...args: A) => R>
+  ): (this: T, ...args: A) => R
+  ```
+- Внутри: `WeakMap<object, Map<string, R>>`. Ключ args — `JSON.stringify(args)`
+- Возвращаемая функция: получить мапу для `this`, проверить ключ, вызвать `originalMethod.call(this, ...args)` если нет, положить в мапу
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+## Главное
 
-## Production standard
+`Calculator.compute` помечен `@cache`. Тесты проверяют что повторные вызовы с теми же аргументами не увеличивают `calls`. Декоратор не меняет сигнатуру метода — TS типы должны сохраняться.
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+## Критерии сдачи
 
-Recommended workflow for a new exercise:
-
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- 6 тестов в `tests/unit/cache-decorator.test.ts` зелёные
+- Тип-контракты сохраняются — `compute` возвращает `number`, `greet` возвращает `string`
+- `npm run check` зелёный

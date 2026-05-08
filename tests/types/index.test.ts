@@ -1,12 +1,13 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { Calculator } from '../../src/calculator.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('@cache preserves method signatures', () => {
+  it('compute returns number', () => {
+    expectTypeOf(Calculator.prototype.compute).returns.toEqualTypeOf<number>();
+    expectTypeOf(Calculator.prototype.compute).parameters.toEqualTypeOf<[number, number]>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('greet returns string', () => {
+    expectTypeOf(Calculator.prototype.greet).returns.toEqualTypeOf<string>();
+    expectTypeOf(Calculator.prototype.greet).parameters.toEqualTypeOf<[string]>();
   });
 });
