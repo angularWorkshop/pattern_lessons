@@ -1,53 +1,25 @@
-# pattern_lessons
+# Topic 14 · Exercise 14.2 — Chain of Responsibility: цепочка валидаторов
 
-Base repository for EduTec Design Patterns course exercises.
+Реализуй `chain(validators)` — компоновщик асинхронных валидаторов поля в стиле middleware. Первый валидатор, вернувший ошибку, обрывает цепочку.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/validators.ts` реализуй `chain<T>(validators)`:
 
-The repository is intentionally framework-agnostic. It provides:
+- Возвращает функцию `(value) => Promise<ValidationResult>`
+- Внутри — рекурсивный диспетчер `dispatch(i)`:
+  - Если `validators[i]` нет → вернуть `{ ok: true }`
+  - Иначе позвать `validators[i](value, () => dispatch(i + 1))` и обернуть в `Promise.resolve(...)`
+- Следующий валидатор запускается только если предыдущий вызвал `next()`
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+## Главное
 
-## Production standard
+- Sync валидатор может вернуть результат напрямую: `return { ok: false, field, reason }` — это обрывает цепочку
+- Async валидатор может `await` сделать что угодно перед `next()`
+- `required` и `emailFormat` уже реализованы как примеры; `uniqueInDb` — фабрика-async-валидатор
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+## Критерии сдачи
 
-Recommended workflow for a new exercise:
-
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- 10 тестов в `tests/unit/validators.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` зелёный
