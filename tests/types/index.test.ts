@@ -1,12 +1,26 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import {
+  CommandStack,
+  IncrementCommand,
+  Counter,
+  type Command,
+} from '../../src/command.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Command type contracts', () => {
+  it('Command interface has execute and undo', () => {
+    expectTypeOf<Command>().toEqualTypeOf<{ execute(): void; undo(): void }>();
   });
 
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('IncrementCommand implements Command', () => {
+    expectTypeOf<IncrementCommand>().toMatchTypeOf<Command>();
+  });
+
+  it('CommandStack.run takes a Command', () => {
+    expectTypeOf(CommandStack.prototype.run).parameters.toEqualTypeOf<[Command]>();
+    expectTypeOf(CommandStack.prototype.run).returns.toEqualTypeOf<void>();
+  });
+
+  it('IncrementCommand constructor takes a Counter', () => {
+    expectTypeOf(IncrementCommand).constructorParameters.toEqualTypeOf<[Counter]>();
   });
 });
