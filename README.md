@@ -1,4 +1,4 @@
-# Topic 15 · Exercise 15.1 — Command: undo/redo
+# Topic 15 · Exercise 15.1 — Command: undo/redo · Solution
 
 Реализуй `CommandStack` — стек команд с undo/redo. Каждая команда знает, как себя выполнить и откатить.
 

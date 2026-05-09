@@ -7,25 +7,32 @@ export interface Command {
   undo(): void;
 }
 
-// TODO: реализовать CommandStack.
-// - run(cmd): выполнить cmd.execute(), положить в undoStack, очистить redoStack
-// - undo(): вытащить из undoStack, позвать .undo(), положить в redoStack
-// - redo(): вытащить из redoStack, позвать .execute(), положить в undoStack
-// - canUndo / canRedo — есть ли что откатывать/повторять
 export class CommandStack {
   protected undoStack: Command[] = [];
   protected redoStack: Command[] = [];
 
-  public run(_cmd: Command): void {
-    throw new Error('CommandStack.run is not implemented yet');
+  public run(cmd: Command): void {
+    cmd.execute();
+    this.undoStack.push(cmd);
+    this.redoStack.length = 0;
   }
 
   public undo(): void {
-    throw new Error('CommandStack.undo is not implemented yet');
+    const cmd = this.undoStack.pop();
+    if (!cmd) {
+      throw new Error('CommandStack.undo: nothing to undo');
+    }
+    cmd.undo();
+    this.redoStack.push(cmd);
   }
 
   public redo(): void {
-    throw new Error('CommandStack.redo is not implemented yet');
+    const cmd = this.redoStack.pop();
+    if (!cmd) {
+      throw new Error('CommandStack.redo: nothing to redo');
+    }
+    cmd.execute();
+    this.undoStack.push(cmd);
   }
 
   public canUndo(): boolean {
