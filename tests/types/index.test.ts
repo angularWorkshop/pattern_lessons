@@ -1,12 +1,16 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { CommandQueue, type CommandId, type QueueCommand } from '../../src/queue.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('CommandQueue type contracts', () => {
+  it('schedule takes a QueueCommand and a number, returns CommandId', () => {
+    expectTypeOf(CommandQueue.prototype.schedule).parameters.toEqualTypeOf<[QueueCommand, number]>();
+    expectTypeOf(CommandQueue.prototype.schedule).returns.toEqualTypeOf<CommandId>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('cancel takes a CommandId, returns void', () => {
+    expectTypeOf(CommandQueue.prototype.cancel).parameters.toEqualTypeOf<[CommandId]>();
+    expectTypeOf(CommandQueue.prototype.cancel).returns.toEqualTypeOf<void>();
+  });
+  it('runAll returns readonly CommandId[]', () => {
+    expectTypeOf(CommandQueue.prototype.runAll).returns.toEqualTypeOf<readonly CommandId[]>();
   });
 });
