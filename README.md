@@ -1,4 +1,4 @@
-# Topic 14 · Exercise 14.2 — Chain of Responsibility: цепочка валидаторов
+# Topic 14 · Exercise 14.2 — Chain of Responsibility: цепочка валидаторов · Solution
 
 Реализуй `chain(validators)` — компоновщик асинхронных валидаторов поля в стиле middleware. Первый валидатор, вернувший ошибку, обрывает цепочку.
 
