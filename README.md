@@ -1,4 +1,4 @@
-# Topic 15 · Exercise 15.2 — CommandQueue с приоритетами
+# Topic 15 · Exercise 15.2 — CommandQueue с приоритетами · Solution
 
 Реализуй очередь команд с поддержкой приоритетов и отмены до выполнения.
 

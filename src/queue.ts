@@ -1,5 +1,3 @@
-// Очередь команд с приоритетами и возможностью отмены до выполнения.
-
 export interface QueueCommand {
   execute(): void;
 }
@@ -11,27 +9,46 @@ interface ScheduledItem {
   priority: number;
   command: QueueCommand;
   cancelled: boolean;
+  insertedAt: number;
 }
 
-// TODO: реализовать CommandQueue.
-// - schedule(cmd, priority) → возвращает CommandId. Записывает в items
-// - cancel(id) → ставит флаг cancelled на запись с этим id
-// - runAll() → исполняет команды по убыванию приоритета;
-//   при равных приоритетах сохраняется порядок добавления (стабильная сортировка).
-//   Cancelled-записи пропускаются. Возвращает массив id выполненных в порядке выполнения.
 export class CommandQueue {
   private readonly items: ScheduledItem[] = [];
   private nextId: CommandId = 1;
+  private nextInsertion = 0;
 
-  public schedule(_command: QueueCommand, _priority: number): CommandId {
-    throw new Error('CommandQueue.schedule is not implemented yet');
+  public schedule(command: QueueCommand, priority: number): CommandId {
+    const id = this.nextId++;
+    this.items.push({
+      id,
+      priority,
+      command,
+      cancelled: false,
+      insertedAt: this.nextInsertion++,
+    });
+    return id;
   }
 
-  public cancel(_id: CommandId): void {
-    throw new Error('CommandQueue.cancel is not implemented yet');
+  public cancel(id: CommandId): void {
+    const item = this.items.find((it) => it.id === id);
+    if (item) {
+      item.cancelled = true;
+    }
   }
 
   public runAll(): readonly CommandId[] {
-    throw new Error('CommandQueue.runAll is not implemented yet');
+    const ordered = [...this.items].sort((a, b) => {
+      if (a.priority !== b.priority) {
+        return b.priority - a.priority;
+      }
+      return a.insertedAt - b.insertedAt;
+    });
+    const executed: CommandId[] = [];
+    for (const item of ordered) {
+      if (item.cancelled) continue;
+      item.command.execute();
+      executed.push(item.id);
+    }
+    return executed;
   }
 }
