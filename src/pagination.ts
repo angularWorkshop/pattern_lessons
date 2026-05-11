@@ -17,16 +17,13 @@ export interface ApiClient {
   fetchPage(cursor: string | null): Promise<Page>;
 }
 
-// TODO: реализовать async generator fetchAllUsers(api).
-// Внутри:
-//   let cursor: string | null = null;
-//   do {
-//     const page = await api.fetchPage(cursor);
-//     for (const user of page.users) yield user;
-//     cursor = page.nextCursor;
-//   } while (cursor !== null);
-//
-// Так получаем for-await-of по всем пользователям без знания про страницы.
-export async function* fetchAllUsers(_api: ApiClient): AsyncGenerator<User, void, unknown> {
-  throw new Error('fetchAllUsers is not implemented yet');
+export async function* fetchAllUsers(api: ApiClient): AsyncGenerator<User, void, unknown> {
+  let cursor: string | null = null;
+  do {
+    const page = await api.fetchPage(cursor);
+    for (const user of page.users) {
+      yield user;
+    }
+    cursor = page.nextCursor;
+  } while (cursor !== null);
 }

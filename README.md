@@ -1,4 +1,4 @@
-# Topic 16 · Exercise 16.1 — Iterator: async pagination
+# Topic 16 · Exercise 16.1 — Iterator: async pagination · Solution
 
 Реализуй async generator `fetchAllUsers(api)`, который скрывает пагинацию: внешний код пишет `for await ... of` без знания про страницы.
 
