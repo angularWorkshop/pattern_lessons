@@ -1,12 +1,9 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { fetchAllUsers, type ApiClient, type User } from '../../src/pagination.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
-  });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+describe('fetchAllUsers type contracts', () => {
+  it('returns AsyncGenerator<User, void, unknown>', () => {
+    const api: ApiClient = { async fetchPage() { return { users: [], nextCursor: null }; } };
+    expectTypeOf(fetchAllUsers(api)).toEqualTypeOf<AsyncGenerator<User, void, unknown>>();
   });
 });
