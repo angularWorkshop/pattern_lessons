@@ -1,53 +1,23 @@
-# pattern_lessons
+# Topic 19 · Exercise 19.1 — Observer: типизированный EventEmitter
 
-Base repository for EduTec Design Patterns course exercises.
+Реализуй `EventEmitter<Events>` с типизированными именами событий и аргументами. Передал не тот тип в `emit` — ошибка компилятора.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/emitter.ts`:
 
-The repository is intentionally framework-agnostic. It provides:
+- Внутри — `Map<keyof Events, Set<Listener>>`
+- `on(name, listener)` — найти/создать Set, добавить listener
+- `off(name, listener)` — удалить из Set
+- `once(name, listener)` — обернуть listener: вызвать оригинал, потом `this.off(name, wrapper)`
+- `emit(name, ...args)` — пройтись по копии Set (`[...set]`), чтобы новые подписки внутри listener'а не попадали в текущий проход
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+## Главное
 
-## Production standard
+Тест «does not run listeners added during the current emit» — ключевой. Копируй Set перед обходом, иначе будут двойные вызовы или бесконечная рекурсия.
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+## Критерии сдачи
 
-Recommended workflow for a new exercise:
-
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- 7 тестов в `tests/unit/emitter.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные (передача неверного типа в emit — ошибка компиляции)
+- `npm run check` зелёный

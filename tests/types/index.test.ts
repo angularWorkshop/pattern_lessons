@@ -1,12 +1,20 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { EventEmitter } from '../../src/emitter.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+type Events = {
+  click: [x: number, y: number];
+  message: [body: string];
+};
+
+describe('EventEmitter type contracts', () => {
+  it('on takes correctly typed args for the event', () => {
+    const e = new EventEmitter<Events>();
+    expectTypeOf(e.on<'click'>).parameters.toEqualTypeOf<['click', (x: number, y: number) => void]>();
+    expectTypeOf(e.on<'message'>).parameters.toEqualTypeOf<['message', (body: string) => void]>();
   });
 
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('emit takes correctly typed args for the event', () => {
+    const e = new EventEmitter<Events>();
+    expectTypeOf(e.emit<'click'>).parameters.toEqualTypeOf<['click', number, number]>();
   });
 });
