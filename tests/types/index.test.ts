@@ -1,12 +1,16 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { evaluate, prettyPrint, collectVars, type Env, type Expr } from '../../src/ast.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('AST type contracts', () => {
+  it('evaluate takes Expr + Env, returns number', () => {
+    expectTypeOf(evaluate).parameters.toEqualTypeOf<[Expr, Env]>();
+    expectTypeOf(evaluate).returns.toEqualTypeOf<number>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('prettyPrint takes Expr, returns string', () => {
+    expectTypeOf(prettyPrint).parameters.toEqualTypeOf<[Expr]>();
+    expectTypeOf(prettyPrint).returns.toEqualTypeOf<string>();
+  });
+  it('collectVars returns readonly string[]', () => {
+    expectTypeOf(collectVars).returns.toEqualTypeOf<readonly string[]>();
   });
 });
