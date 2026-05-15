@@ -22,6 +22,6 @@ export function pipeline<A, B, C, D, E>(
   s3: (c: C) => D,
   s4: (d: D) => E,
 ): (a: A) => E;
-export function pipeline(..._steps: ((value: unknown) => unknown)[]): (value: unknown) => unknown {
-  throw new Error('pipeline is not implemented yet');
+export function pipeline(...steps: ((value: unknown) => unknown)[]): (value: unknown) => unknown {
+  return (value) => steps.reduce((acc, step) => step(acc), value);
 }
