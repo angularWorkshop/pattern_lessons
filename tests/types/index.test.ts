@@ -1,12 +1,21 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import {
+  NumNode,
+  Evaluator,
+  Printer,
+  type Visitor,
+} from '../../src/visitor.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Classical Visitor type contracts', () => {
+  it('accept is generic in the visitor result', () => {
+    const num = new NumNode(1);
+    expectTypeOf(num.accept(new Evaluator({}))).toEqualTypeOf<number>();
+    expectTypeOf(num.accept(new Printer())).toEqualTypeOf<string>();
   });
 
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('Visitor interface has visitNum / visitVar / visitBinOp', () => {
+    expectTypeOf<Visitor<unknown>>().toHaveProperty('visitNum');
+    expectTypeOf<Visitor<unknown>>().toHaveProperty('visitVar');
+    expectTypeOf<Visitor<unknown>>().toHaveProperty('visitBinOp');
   });
 });

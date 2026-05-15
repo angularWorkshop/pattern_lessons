@@ -1,53 +1,32 @@
-# pattern_lessons
+# Topic 23 · Exercise 23.2 — Классический Visitor (для сравнения)
 
-Base repository for EduTec Design Patterns course exercises.
+Реализуй классический Visitor с двойной диспетчеризацией. Сравни с 23.1 (discriminated union) — там код проще, но эта версия открытая: новый visitor добавляется не трогая узлы.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/visitor.ts`:
 
-The repository is intentionally framework-agnostic. It provides:
+**accept() в каждом узле** — двойная диспетчеризация:
+- `NumNode.accept(v)` → `v.visitNum(this)`
+- `VarNode.accept(v)` → `v.visitVar(this)`
+- `BinOpNode.accept(v)` → `v.visitBinOp(this)`
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+**Evaluator implements Visitor<number>**:
+- `visitNum(n)` → `n.value`
+- `visitVar(n)` → `this.env[n.name]` или throw
+- `visitBinOp(n)` → `n.left.accept(this)` + `n.right.accept(this)` + применить `n.op`
 
-## Production standard
+**Printer implements Visitor<string>**:
+- `visitNum` → `String(n.value)`
+- `visitVar` → `n.name`
+- `visitBinOp` → `"(${left.accept(this)} ${op} ${right.accept(this)})"`
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+## Главное
 
-Recommended workflow for a new exercise:
+Тест «adding a new visitor does not touch nodes» проверяет, что можно добавить новый класс-визитор (например Depth) без правки NumNode/VarNode/BinOpNode. Открытость к новым операциям — главное достоинство классического Visitor.
 
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
+## Критерии сдачи
 
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- 7 тестов в `tests/unit/visitor.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` зелёный
