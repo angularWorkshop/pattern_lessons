@@ -14,10 +14,6 @@ export const minLength = (n: number): ValidationStrategy<string> => (value) =>
 export const pattern = (re: RegExp, label: string): ValidationStrategy<string> => (value) =>
   re.test(value) ? [] : [`pattern-${label}`];
 
-// TODO: реализовать combine(...strategies).
-// Возвращает стратегию, которая прогоняет все validators и склеивает ошибки.
-// Все запускаются — не short-circuit. Это часто хочется, чтобы вернуть пользователю
-// все проблемы сразу, а не показывать по одной за раз.
-export function combine<T>(..._strategies: readonly ValidationStrategy<T>[]): ValidationStrategy<T> {
-  throw new Error('combine is not implemented yet');
+export function combine<T>(...strategies: readonly ValidationStrategy<T>[]): ValidationStrategy<T> {
+  return (value) => strategies.flatMap((strategy) => strategy(value));
 }
