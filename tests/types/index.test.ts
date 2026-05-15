@@ -1,12 +1,18 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { Form, type FormState, type CustomerType } from '../../src/form.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Form type contracts', () => {
+  it('CustomerType is business | individual', () => {
+    expectTypeOf<CustomerType>().toEqualTypeOf<'individual' | 'business'>();
   });
 
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('getState returns a FormState snapshot', () => {
+    expectTypeOf(Form.prototype.getState).returns.toEqualTypeOf<FormState>();
+  });
+
+  it('update is typed by field name', () => {
+    const f = new Form();
+    expectTypeOf(f.update<'country'>).parameters.toEqualTypeOf<['country', string]>();
+    expectTypeOf(f.update<'customerType'>).parameters.toEqualTypeOf<['customerType', CustomerType]>();
   });
 });
