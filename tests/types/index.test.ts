@@ -1,12 +1,16 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { createSignal, type Getter, type Setter } from '../../src/signals.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Signal type contracts', () => {
+  it('createSignal returns [getter, setter] preserving T', () => {
+    const [count, setCount] = createSignal(0);
+    expectTypeOf(count).toEqualTypeOf<Getter<number>>();
+    expectTypeOf(setCount).toEqualTypeOf<Setter<number>>();
+    expectTypeOf(count()).toEqualTypeOf<number>();
   });
 
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('works with complex types', () => {
+    const [user] = createSignal({ id: 'x', name: 'A' });
+    expectTypeOf(user()).toEqualTypeOf<{ id: string; name: string }>();
   });
 });

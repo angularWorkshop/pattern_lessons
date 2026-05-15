@@ -1,53 +1,42 @@
-# pattern_lessons
+# Topic 19 · Exercise 19.2 — Observer: signals на 50 строк
 
-Base repository for EduTec Design Patterns course exercises.
+Реализуй упрощённые signals в стиле Solid/Angular. `createSignal` возвращает геттер и сеттер; `effect` автоматически подписывается на signal-ы, которые читает.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/signals.ts`:
 
-The repository is intentionally framework-agnostic. It provides:
+```ts
+let currentEffect: EffectFn | null = null;
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+export function createSignal<T>(initial: T) {
+  let value = initial;
+  const subscribers = new Set<EffectFn>();
 
-## Production standard
+  const get: Getter<T> = () => {
+    if (currentEffect) subscribers.add(currentEffect);
+    return value;
+  };
+  const set: Setter<T> = (next) => {
+    value = next;
+    for (const sub of [...subscribers]) sub();
+  };
+  return [get, set] as const;
+}
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
-
-Recommended workflow for a new exercise:
-
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
+export function effect(fn: EffectFn): void {
+  const previous = currentEffect;
+  currentEffect = fn;
+  try { fn(); } finally { currentEffect = previous; }
+}
 ```
+
+## Главное
+
+Когда `effect(fn)` запускается, в `currentEffect` стоит `fn`. Любой `getter()` внутри `fn` видит этого «текущего» и добавляет в свои subscribers. Потом сеттер обходит subscribers и заново вызывает каждого.
+
+## Критерии сдачи
+
+- 7 тестов в `tests/unit/signals.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` зелёный
