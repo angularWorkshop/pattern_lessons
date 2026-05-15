@@ -1,12 +1,15 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import {
+  DocumentProcessor,
+  PdfProcessor,
+  type ProcessLog,
+} from '../../src/document-processor.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Template Method type contracts', () => {
+  it('process returns ProcessLog', () => {
+    expectTypeOf(DocumentProcessor.prototype.process).returns.toEqualTypeOf<ProcessLog>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('PdfProcessor is a DocumentProcessor', () => {
+    expectTypeOf<PdfProcessor>().toMatchTypeOf<DocumentProcessor>();
   });
 });
