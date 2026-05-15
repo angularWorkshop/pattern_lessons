@@ -1,8 +1,3 @@
-// Memento — снапшоты состояния редактируемого документа.
-// Три роли: Originator (Document), Memento (Snapshot), Caretaker (Caretaker).
-// Originator знает, как создать снимок и восстановиться из него.
-// Caretaker хранит список снимков и timestamp, но не лезет внутрь — это инкапсуляция.
-
 export interface DocumentSnapshot {
   readonly state: { title: string; body: string };
   readonly takenAt: number;
@@ -28,40 +23,44 @@ export class TextDocument {
     return this.body;
   }
 
-  // TODO: save() — снимок текущего состояния. Делать глубокую копию через структурированный clone,
-  // чтобы мутация документа не влияла на снимок.
-  public save(_now: number): DocumentSnapshot {
-    throw new Error('TextDocument.save is not implemented yet');
+  public save(now: number): DocumentSnapshot {
+    return {
+      state: structuredClone({ title: this.title, body: this.body }),
+      takenAt: now,
+    };
   }
 
-  // TODO: restore(snapshot) — восстановить state из снимка (тоже клонировать, чтобы внешняя
-  // мутация снимка после restore не сломала документ).
-  public restore(_snapshot: DocumentSnapshot): void {
-    throw new Error('TextDocument.restore is not implemented yet');
+  public restore(snapshot: DocumentSnapshot): void {
+    const cloned = structuredClone(snapshot.state);
+    this.title = cloned.title;
+    this.body = cloned.body;
   }
 }
 
-// TODO: Caretaker хранит список снимков, выдаёт их по индексу.
-// - capture(doc, now): doc.save(now), записать в snapshots
-// - count(): сколько снимков
-// - at(i): получить снимок по индексу (или throw на out of range)
-// - restoreTo(doc, i): doc.restore(snapshots[i])
 export class Caretaker {
   private readonly snapshots: DocumentSnapshot[] = [];
 
-  public capture(_doc: TextDocument, _now: number): void {
-    throw new Error('Caretaker.capture is not implemented yet');
+  public capture(doc: TextDocument, now: number): void {
+    this.snapshots.push(doc.save(now));
   }
 
   public count(): number {
     return this.snapshots.length;
   }
 
-  public at(_index: number): DocumentSnapshot {
-    throw new Error('Caretaker.at is not implemented yet');
+  public at(index: number): DocumentSnapshot {
+    const snap = this.snapshots[index];
+    if (!snap) {
+      throw new Error(`Caretaker.at: index ${index} is out of range`);
+    }
+    return snap;
   }
 
-  public restoreTo(_doc: TextDocument, _index: number): void {
-    throw new Error('Caretaker.restoreTo is not implemented yet');
+  public restoreTo(doc: TextDocument, index: number): void {
+    const snap = this.snapshots[index];
+    if (!snap) {
+      throw new Error(`Caretaker.restoreTo: index ${index} is out of range`);
+    }
+    doc.restore(snap);
   }
 }

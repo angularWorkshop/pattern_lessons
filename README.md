@@ -1,4 +1,4 @@
-# Topic 18 · Exercise 18.1 — Memento: автосейв документа
+# Topic 18 · Exercise 18.1 — Memento: автосейв документа · Solution
 
 Реализуй снапшоты состояния через паттерн Memento. `TextDocument` (Originator) умеет создавать снимок и восстанавливаться из него. `Caretaker` хранит коллекцию снимков.
 
