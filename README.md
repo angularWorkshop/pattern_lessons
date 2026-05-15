@@ -1,4 +1,4 @@
-# Topic 21 · Exercise 21.2 — Strategy: расчёт цены корзины
+# Topic 21 · Exercise 21.2 — Strategy: расчёт цены корзины · Solution
 
 Реализуй три стратегии расчёта цены и интегрируй их в Cart. Стратегия — это просто функция `(cart) => PriceBreakdown`. Cart.calculate делегирует расчёт стратегии.
 

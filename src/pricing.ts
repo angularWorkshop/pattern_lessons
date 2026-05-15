@@ -1,6 +1,3 @@
-// Стратегии расчёта цены корзины. Каждая — функция (cart) → priceBreakdown.
-// Cart хранит товары; calculate(strategy) делегирует расчёт стратегии.
-
 export interface CartItem {
   sku: string;
   price: number;
@@ -31,25 +28,28 @@ export class Cart {
     return this.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   }
 
-  // Контекст просто делегирует стратегии.
   public calculate(strategy: PricingStrategy): PriceBreakdown {
     return strategy(this);
   }
 }
 
-// Готовые стратегии.
+const round = (value: number): number => Math.round(value * 100) / 100;
 
-// TODO: guestStrategy — никакой скидки, доставка 10 (если subtotal > 0), total = subtotal + shipping.
-export const guestStrategy: PricingStrategy = (_cart) => {
-  throw new Error('guestStrategy is not implemented yet');
+export const guestStrategy: PricingStrategy = (cart) => {
+  const subtotal = cart.subtotal();
+  const shipping = subtotal > 0 ? 10 : 0;
+  return { subtotal, discount: 0, shipping, total: subtotal + shipping };
 };
 
-// TODO: memberStrategy — 5% скидка, доставка 10. total = subtotal - discount + shipping.
-export const memberStrategy: PricingStrategy = (_cart) => {
-  throw new Error('memberStrategy is not implemented yet');
+export const memberStrategy: PricingStrategy = (cart) => {
+  const subtotal = cart.subtotal();
+  const discount = round(subtotal * 0.05);
+  const shipping = subtotal > 0 ? 10 : 0;
+  return { subtotal, discount, shipping, total: round(subtotal - discount + shipping) };
 };
 
-// TODO: premiumStrategy — 10% скидка, бесплатная доставка (shipping = 0).
-export const premiumStrategy: PricingStrategy = (_cart) => {
-  throw new Error('premiumStrategy is not implemented yet');
+export const premiumStrategy: PricingStrategy = (cart) => {
+  const subtotal = cart.subtotal();
+  const discount = round(subtotal * 0.1);
+  return { subtotal, discount, shipping: 0, total: round(subtotal - discount) };
 };
