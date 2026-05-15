@@ -1,4 +1,4 @@
-# Topic 22 · Exercise 22.1 — Template Method: классовый процессор документов
+# Topic 22 · Exercise 22.1 — Template Method: классовый процессор документов · Solution
 
 Скелет процесса (parse → validate → transform → save) фиксируется в абстрактном классе. Конкретные шаги — в наследниках. Опциональный hook `beforeSave` — пустой по умолчанию, переопределяется по желанию.
 

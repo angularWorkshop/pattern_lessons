@@ -35,51 +35,41 @@ export abstract class DocumentProcessor {
   }
 }
 
-// TODO: реализовать PdfProcessor.
-// - parse: "[PDF] " + raw
-// - validate: parsed.length > 0
-// - transform: uppercase
-// - save: this.savedPayload = transformed
-// - beforeSave: вернуть true и записать this.audit = true
 export class PdfProcessor extends DocumentProcessor {
   public savedPayload = '';
   public audit = false;
 
-  protected override parse(_raw: string): string {
-    throw new Error('PdfProcessor.parse is not implemented yet');
+  protected override parse(raw: string): string {
+    return `[PDF] ${raw}`;
   }
-  protected override validate(_parsed: string): boolean {
-    throw new Error('PdfProcessor.validate is not implemented yet');
+  protected override validate(parsed: string): boolean {
+    return parsed.length > 0;
   }
-  protected override transform(_parsed: string): string {
-    throw new Error('PdfProcessor.transform is not implemented yet');
+  protected override transform(parsed: string): string {
+    return parsed.toUpperCase();
   }
-  protected override save(_transformed: string): void {
-    throw new Error('PdfProcessor.save is not implemented yet');
+  protected override save(transformed: string): void {
+    this.savedPayload = transformed;
   }
   protected override beforeSave(_transformed: string): boolean {
-    throw new Error('PdfProcessor.beforeSave is not implemented yet');
+    this.audit = true;
+    return true;
   }
 }
 
-// TODO: HtmlProcessor — без override beforeSave (используется дефолтный).
-// - parse: "[HTML] " + raw
-// - validate: !parsed.includes('<script>')
-// - transform: parsed.replace(/<[^>]+>/g, '')   // strip tags
-// - save: this.savedPayload = transformed
 export class HtmlProcessor extends DocumentProcessor {
   public savedPayload = '';
 
-  protected override parse(_raw: string): string {
-    throw new Error('HtmlProcessor.parse is not implemented yet');
+  protected override parse(raw: string): string {
+    return `[HTML] ${raw}`;
   }
-  protected override validate(_parsed: string): boolean {
-    throw new Error('HtmlProcessor.validate is not implemented yet');
+  protected override validate(parsed: string): boolean {
+    return !parsed.includes('<script>');
   }
-  protected override transform(_parsed: string): string {
-    throw new Error('HtmlProcessor.transform is not implemented yet');
+  protected override transform(parsed: string): string {
+    return parsed.replace(/<[^>]+>/g, '');
   }
-  protected override save(_transformed: string): void {
-    throw new Error('HtmlProcessor.save is not implemented yet');
+  protected override save(transformed: string): void {
+    this.savedPayload = transformed;
   }
 }
