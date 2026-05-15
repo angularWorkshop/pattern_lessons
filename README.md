@@ -1,53 +1,27 @@
-# pattern_lessons
+# Topic 16 · Exercise 16.2 — Iterator: бесконечные последовательности
 
-Base repository for EduTec Design Patterns course exercises.
+Реализуй бесконечные генераторы (`fibonacci`, `naturals`) и ленивые комбинаторы (`take`, `map`). Главная идея — последовательности живут «вечно», но `take(n)` берёт конечный префикс не вычисляя лишнего.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/sequences.ts`:
 
-The repository is intentionally framework-agnostic. It provides:
+- `fibonacci()` — `function*`, yield-ит 0, 1, 1, 2, 3, ... через `while (true)`
+- `naturals()` — `function*`, yield-ит 0, 1, 2, 3, ...
+- `take(gen, n)`:
+  - принимает любой `Iterable<T>` (массив, генератор)
+  - возвращает массив из первых `n` значений
+  - если источник коротче — что есть
+- `map(gen, fn)`:
+  - возвращает новый `Iterable<U>` (через `function*` внутри)
+  - `fn` вызывается только когда потребитель просит следующее значение — это и есть laziness
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+## Главное
 
-## Production standard
+Тест «map laziness» проверяет, что `fn` не вызывается для значений, которые никто не запрашивал. Без этой ленивости бесконечная последовательность зависнет на первом `map`.
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+## Критерии сдачи
 
-Recommended workflow for a new exercise:
-
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- 11 тестов в `tests/unit/sequences.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` зелёный

@@ -1,12 +1,18 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { fibonacci, naturals, take, map } from '../../src/sequences.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('sequence type contracts', () => {
+  it('fibonacci returns Generator<number, void, unknown>', () => {
+    expectTypeOf(fibonacci()).toEqualTypeOf<Generator<number, void, unknown>>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('naturals returns Generator<number, void, unknown>', () => {
+    expectTypeOf(naturals()).toEqualTypeOf<Generator<number, void, unknown>>();
+  });
+  it('take returns an array of the source element type', () => {
+    expectTypeOf(take(naturals(), 5)).toEqualTypeOf<number[]>();
+    expectTypeOf(take(['a', 'b'], 2)).toEqualTypeOf<string[]>();
+  });
+  it('map carries the mapped type', () => {
+    expectTypeOf(map(naturals(), (n) => String(n))).toEqualTypeOf<Iterable<string>>();
   });
 });
