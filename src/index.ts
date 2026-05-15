@@ -1,26 +1,11 @@
-export type Brand<T, Name extends string> = T & { readonly __brand: Name };
-
-export type UserId = Brand<string, 'UserId'>;
-
-export interface LessonUser {
-  id: UserId;
-  name: string;
-  email?: string;
-}
-
-export function createUserId(value: string): UserId {
-  return value as UserId;
-}
-
-export function createLessonUser(name: string, email?: string): LessonUser {
-  return {
-    id: createUserId(`user:${name.toLowerCase()}`),
-    name,
-    ...(email ? { email } : {}),
-  };
-}
-
-export function sum(values: readonly number[]): number {
-  return values.reduce((total: number, value: number) => total + value, 0);
-}
-
+export * from './models/task.js';
+export * from './factory/task-factory.js';
+export * from './state/task-state.js';
+export * from './observer/event-bus.js';
+export * from './strategy/sort-strategies.js';
+export * from './commands/command.js';
+export * from './commands/command-stack.js';
+export * from './commands/board.js';
+export * from './commands/commands.js';
+export * from './decorator/http-client.js';
+export * from './facade/task-tracker.js';

@@ -1,53 +1,64 @@
-# pattern_lessons
+# Capstone — Mini Task Tracker
 
-Base repository for EduTec Design Patterns course exercises.
+Финальный проект курса. Trello-подобный таск-трекер, где 7 паттернов работают в связке. Цель — не «применить все паттерны ради паттернов», а показать, как они **естественно** делят ответственность.
 
-Each exercise should branch from `main` into:
+## Карта паттернов
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+| Паттерн | Модуль | Ответственность |
+|---|---|---|
+| **Factory Method** | `src/factory/task-factory.ts` | Создание задач с дефолтами по типу: `createBug` / `createFeature` / `createChore` |
+| **State** | `src/state/task-state.ts` | Валидация переходов статуса задачи. Нелегальный — `IllegalTransitionError` |
+| **Command** | `src/commands/*` | Каждое мутирующее действие — отдельная команда с `execute/undo`. Стек поддерживает undo/redo |
+| **Observer** | `src/observer/event-bus.ts` | Типобезопасный EventBus. Подписчики получают только своё событие |
+| **Strategy** | `src/strategy/sort-strategies.ts` | 3 стратегии сортировки: `byDate` / `byPriority` / `byAssignee` |
+| **Decorator** | `src/decorator/http-client.ts` | HTTP-клиент: `withLogging` / `withRetry` / `withCache` — собираются цепочкой |
+| **Facade** | `src/facade/task-tracker.ts` | Единый сервис `TaskTracker` поверх всего — публичный API |
 
-The repository is intentionally framework-agnostic. It provides:
+## Что нужно сделать
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+Реализуй стабы во всех 7 модулях. Каждый модуль — отдельный паттерн с отдельным набором тестов.
 
-## Production standard
+### Порядок работы (рекомендую)
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+1. **Factory** — `createBug/createFeature/createChore` (легко, разогрев)
+2. **State** — `assertTransition` (чистая функция)
+3. **Strategy** — `byDate/byPriority/byAssignee` + `priorityRank`
+4. **Observer** — `EventBus` (Map<type, Set<listener>>)
+5. **Decorator** — `withLogging/withRetry/withCache` (3 независимые функции)
+6. **Command** — `CommandStack` + 5 команд (`AddTask/RemoveTask/UpdateTask/MoveTask/RenameTask`)
+7. **Facade** — `TaskTracker`, который соединяет всё (добавь команду в стек → выполни → эмитни событие)
 
-Recommended workflow for a new exercise:
+## Главные инварианты
 
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
+- **undo/redo** доказан тестами: после `undo` → `redo` состояние идентично исходному.
+- **State**: `moveTask` ДО выполнения команды проверяет переход через `assertTransition`.
+- **Observer**: подписчик `task:added` НЕ получает `task:removed` и наоборот.
+- **Decorator**: `withCache` со свежим значением НЕ зовёт base. `withRetry` пробрасывает финальную ошибку.
+- **Facade**: единственный публичный API. Тесты не должны лезть в `_boardRef()` / `_stackRef()`.
 
-## Scripts
+## Критерии сдачи
 
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
+- 7 тест-файлов в `tests/unit/*` — все зелёные (~40 кейсов суммарно)
+- `tests/types/index.test.ts` — публичный API типизирован, нет `any`
+- `npm run check` зелёный
+- Любые мутации в трекере проходят через `CommandStack` → отменяемы
 
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
+## Запуск
 
 ```bash
 npm install
-npm run check
-npm run build
+npm run check      # typecheck + vitest
+npm test           # только тесты
+npm run test:watch # вотчер
 ```
+
+## Что считаем «сдано»
+
+Каждая фича демонстрирует свой паттерн без размывания:
+- `tracker.addTask({type: 'bug', title})` — Factory под капотом
+- `tracker.moveTask(id, 'done')` бросает на нелегальный переход — State
+- `tracker.undo()` откатывает любое последнее действие — Command
+- `tracker.events.on('task:moved', fn)` слушает только moves — Observer
+- `tracker.list(byPriority)` — Strategy
+- HTTP-клиент с `withLogging(withRetry(withCache(base, ttl), 3), log)` — Decorator
+- Весь публичный API — `TaskTracker` — Facade
