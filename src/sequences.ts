@@ -1,27 +1,39 @@
-// Бесконечные lazy-последовательности через generators.
-// Сами по себе они никогда не заканчиваются — но утилиты take/map
-// берут конечный префикс, не вычисляя лишнего.
-
-// TODO: реализовать fibonacci() — бесконечный генератор.
-// Первые значения: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, ...
-// Внутри цикл while (true) с yield на каждой итерации.
 export function* fibonacci(): Generator<number, void, unknown> {
-  throw new Error('fibonacci is not implemented yet');
+  let a = 0;
+  let b = 1;
+  while (true) {
+    yield a;
+    [a, b] = [b, a + b];
+  }
 }
 
-// TODO: реализовать naturals() — бесконечный 0, 1, 2, 3, ...
 export function* naturals(): Generator<number, void, unknown> {
-  throw new Error('naturals is not implemented yet');
+  let n = 0;
+  while (true) {
+    yield n++;
+  }
 }
 
-// TODO: take(gen, n) — забрать первые n значений из (возможно бесконечного) генератора.
-// Возвращает обычный массив.
-export function take<T>(_gen: Iterable<T>, _n: number): T[] {
-  throw new Error('take is not implemented yet');
+export function take<T>(gen: Iterable<T>, n: number): T[] {
+  const result: T[] = [];
+  if (n <= 0) return result;
+  // Получаем итератор и шагаем next() — это не закрывает генератор по выходу,
+  // в отличие от for..of + break, который вызывает iterator.return().
+  const iterator = gen[Symbol.iterator]();
+  for (let i = 0; i < n; i++) {
+    const step = iterator.next();
+    if (step.done) break;
+    result.push(step.value);
+  }
+  return result;
 }
 
-// TODO: map(gen, fn) — ленивый map. Возвращает новый Iterable<U>.
-// Реализовать через generator-обёртку: function* () { for (const x of gen) yield fn(x); }
-export function map<T, U>(_gen: Iterable<T>, _fn: (value: T) => U): Iterable<U> {
-  throw new Error('map is not implemented yet');
+export function map<T, U>(gen: Iterable<T>, fn: (value: T) => U): Iterable<U> {
+  return {
+    *[Symbol.iterator](): Generator<U, void, unknown> {
+      for (const value of gen) {
+        yield fn(value);
+      }
+    },
+  };
 }
