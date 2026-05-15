@@ -1,12 +1,12 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { combine, required, type ValidationStrategy } from '../../src/validation-strategy.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('ValidationStrategy type contracts', () => {
+  it('ValidationStrategy<T> is a function returning readonly string[]', () => {
+    expectTypeOf<ValidationStrategy<string>>().toEqualTypeOf<(value: string) => readonly string[]>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('combine preserves T', () => {
+    const v = combine<string>(required);
+    expectTypeOf(v).toEqualTypeOf<ValidationStrategy<string>>();
   });
 });
