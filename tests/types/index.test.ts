@@ -1,12 +1,11 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { Cart, type PriceBreakdown, type PricingStrategy } from '../../src/pricing.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Pricing type contracts', () => {
+  it('PricingStrategy is (cart: Cart) => PriceBreakdown', () => {
+    expectTypeOf<PricingStrategy>().toEqualTypeOf<(cart: Cart) => PriceBreakdown>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('Cart.calculate returns PriceBreakdown', () => {
+    expectTypeOf(Cart.prototype.calculate).returns.toEqualTypeOf<PriceBreakdown>();
   });
 });
