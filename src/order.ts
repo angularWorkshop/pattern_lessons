@@ -1,7 +1,3 @@
-// Стейт-машина заказа через discriminated union.
-// Каждое состояние — отдельный вариант с уникальным набором полей.
-// Переходы — функции (state, event) → state | error.
-
 export type OrderState =
   | { status: 'cart'; items: readonly string[] }
   | { status: 'checkout'; items: readonly string[]; total: number }
@@ -10,34 +6,48 @@ export type OrderState =
   | { status: 'delivered'; items: readonly string[]; total: number; deliveredAt: number }
   | { status: 'cancelled'; refund: number };
 
-// TODO: реализовать переходы.
-// addToCart(state, item): cart → cart (с расширенным items). Из других состояний — throw.
-export function addToCart(_state: OrderState, _item: string): OrderState {
-  throw new Error('addToCart is not implemented yet');
+const illegal = (op: string, status: string): Error =>
+  new Error(`Order: cannot ${op} from status "${status}"`);
+
+export function addToCart(state: OrderState, item: string): OrderState {
+  if (state.status !== 'cart') throw illegal('addToCart', state.status);
+  return { status: 'cart', items: [...state.items, item] };
 }
 
-// TODO: startCheckout(state, total): cart → checkout. Иначе throw.
-export function startCheckout(_state: OrderState, _total: number): OrderState {
-  throw new Error('startCheckout is not implemented yet');
+export function startCheckout(state: OrderState, total: number): OrderState {
+  if (state.status !== 'cart') throw illegal('startCheckout', state.status);
+  return { status: 'checkout', items: state.items, total };
 }
 
-// TODO: pay(state, now): checkout → paid. Иначе throw.
-export function pay(_state: OrderState, _now: number): OrderState {
-  throw new Error('pay is not implemented yet');
+export function pay(state: OrderState, now: number): OrderState {
+  if (state.status !== 'checkout') throw illegal('pay', state.status);
+  return { status: 'paid', items: state.items, total: state.total, paidAt: now };
 }
 
-// TODO: ship(state, trackingId): paid → shipped. Иначе throw.
-export function ship(_state: OrderState, _trackingId: string): OrderState {
-  throw new Error('ship is not implemented yet');
+export function ship(state: OrderState, trackingId: string): OrderState {
+  if (state.status !== 'paid') throw illegal('ship', state.status);
+  return { status: 'shipped', items: state.items, total: state.total, trackingId };
 }
 
-// TODO: deliver(state, now): shipped → delivered. Иначе throw.
-export function deliver(_state: OrderState, _now: number): OrderState {
-  throw new Error('deliver is not implemented yet');
+export function deliver(state: OrderState, now: number): OrderState {
+  if (state.status !== 'shipped') throw illegal('deliver', state.status);
+  return { status: 'delivered', items: state.items, total: state.total, deliveredAt: now };
 }
 
-// TODO: cancel(state): cart | checkout | paid → cancelled. shipped/delivered/cancelled — throw.
-// refund = paid ? total : 0
-export function cancel(_state: OrderState): OrderState {
-  throw new Error('cancel is not implemented yet');
+export function cancel(state: OrderState): OrderState {
+  switch (state.status) {
+    case 'cart':
+    case 'checkout':
+      return { status: 'cancelled', refund: 0 };
+    case 'paid':
+      return { status: 'cancelled', refund: state.total };
+    case 'shipped':
+    case 'delivered':
+    case 'cancelled':
+      throw illegal('cancel', state.status);
+    default: {
+      const _: never = state;
+      throw new Error(`Unknown state: ${String(_)}`);
+    }
+  }
 }

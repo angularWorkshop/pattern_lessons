@@ -1,4 +1,4 @@
-# Topic 20 · Exercise 20.2 — State через discriminated union
+# Topic 20 · Exercise 20.2 — State через discriminated union · Solution
 
 Реализуй стейт-машину заказа на TypeScript-юнионах. Каждое состояние — вариант union с уникальным набором полей. Переходы — функции, которые принимают state + event и возвращают новый state (или кидают на нелегальный переход).
 
