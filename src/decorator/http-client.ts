@@ -2,35 +2,59 @@ export interface HttpClient {
   get<T>(url: string): Promise<T>;
 }
 
-// TODO: реализуй 3 декоратора-обёртки.
-//
-// withLogging(client, log): каждый вызов get(url) → log(`GET ${url}`) ПЕРЕД и log(`OK ${url} ${ms}ms`) ПОСЛЕ.
-//   На ошибке: log(`ERR ${url} ${msg}`) и проброс.
-//
-// withRetry(client, attempts): пытается attempts раз. После последней неудачной — пробрасывает ошибку.
-//   На успех — сразу возвращает результат.
-//
-// withCache(client, ttlMs, now = Date.now):
-//   - ключ — url
-//   - если в кэше свежее значение (createdAt + ttlMs > now()) — отдаёт его без вызова base
-//   - иначе — вызывает client.get, кладёт в кэш, отдаёт
-//   - стартим кэш ленивым Map
-
-export function withLogging(
-  _client: HttpClient,
-  _log: (msg: string) => void,
-): HttpClient {
-  throw new Error('Not implemented');
+export function withLogging(client: HttpClient, log: (msg: string) => void): HttpClient {
+  return {
+    async get<T>(url: string): Promise<T> {
+      const started = Date.now();
+      log(`GET ${url}`);
+      try {
+        const result = await client.get<T>(url);
+        log(`OK ${url} ${Date.now() - started}ms`);
+        return result;
+      } catch (err) {
+        log(`ERR ${url} ${err instanceof Error ? err.message : String(err)}`);
+        throw err;
+      }
+    },
+  };
 }
 
-export function withRetry(_client: HttpClient, _attempts: number): HttpClient {
-  throw new Error('Not implemented');
+export function withRetry(client: HttpClient, attempts: number): HttpClient {
+  return {
+    async get<T>(url: string): Promise<T> {
+      let lastErr: unknown;
+      for (let i = 0; i < attempts; i++) {
+        try {
+          return await client.get<T>(url);
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+      throw lastErr;
+    },
+  };
+}
+
+interface CacheEntry {
+  createdAt: number;
+  value: unknown;
 }
 
 export function withCache(
-  _client: HttpClient,
-  _ttlMs: number,
-  _now?: () => number,
+  client: HttpClient,
+  ttlMs: number,
+  now: () => number = Date.now,
 ): HttpClient {
-  throw new Error('Not implemented');
+  const cache = new Map<string, CacheEntry>();
+  return {
+    async get<T>(url: string): Promise<T> {
+      const entry = cache.get(url);
+      if (entry && entry.createdAt + ttlMs > now()) {
+        return entry.value as T;
+      }
+      const value = await client.get<T>(url);
+      cache.set(url, { createdAt: now(), value });
+      return value;
+    },
+  };
 }

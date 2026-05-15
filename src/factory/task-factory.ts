@@ -6,13 +6,6 @@ export interface TaskInput {
   assignee?: string | null;
 }
 
-// TODO: реализуй фабрики, чтобы каждый тип задач получил свои дефолты:
-//   - bug: priority по умолчанию 'high'
-//   - feature: priority по умолчанию 'medium'
-//   - chore: priority по умолчанию 'low'
-// Статус всегда 'todo', assignee — null если не указан.
-// id генерируй из глобального счётчика (`nextId()`).
-
 let counter = 0;
 export function nextId(): string {
   counter += 1;
@@ -23,14 +16,26 @@ export function resetIdCounter(): void {
   counter = 0;
 }
 
-export function createBug(_input: TaskInput): Task {
-  throw new Error('Not implemented');
+function base(input: TaskInput, defaults: Pick<Task, 'type' | 'priority'>): Task {
+  return {
+    id: nextId(),
+    type: defaults.type,
+    title: input.title,
+    status: 'todo',
+    priority: input.priority ?? defaults.priority,
+    assignee: input.assignee ?? null,
+    createdAt: Date.now(),
+  };
 }
 
-export function createFeature(_input: TaskInput): Task {
-  throw new Error('Not implemented');
+export function createBug(input: TaskInput): Task {
+  return base(input, { type: 'bug', priority: 'high' });
 }
 
-export function createChore(_input: TaskInput): Task {
-  throw new Error('Not implemented');
+export function createFeature(input: TaskInput): Task {
+  return base(input, { type: 'feature', priority: 'medium' });
+}
+
+export function createChore(input: TaskInput): Task {
+  return base(input, { type: 'chore', priority: 'low' });
 }

@@ -1,12 +1,10 @@
 import type { TaskStatus } from '../models/task.js';
 
-// Легальные переходы:
-//   todo -> in_progress
-//   in_progress -> done
-//   in_progress -> todo  (вернули в работу)
-//   done -> in_progress  (переоткрыли)
-// Любые другие переходы — бросают IllegalTransitionError.
-// Переход в тот же статус — без ошибки (idempotent).
+const LEGAL: Record<TaskStatus, Set<TaskStatus>> = {
+  todo: new Set(['todo', 'in_progress']),
+  in_progress: new Set(['in_progress', 'todo', 'done']),
+  done: new Set(['done', 'in_progress']),
+};
 
 export class IllegalTransitionError extends Error {
   public constructor(
@@ -18,7 +16,8 @@ export class IllegalTransitionError extends Error {
   }
 }
 
-export function assertTransition(_from: TaskStatus, _to: TaskStatus): void {
-  // TODO: проверить переход по таблице выше, на нелегальный — throw IllegalTransitionError.
-  throw new Error('Not implemented');
+export function assertTransition(from: TaskStatus, to: TaskStatus): void {
+  if (!LEGAL[from].has(to)) {
+    throw new IllegalTransitionError(from, to);
+  }
 }

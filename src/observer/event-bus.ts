@@ -12,27 +12,32 @@ export type EventMap = {
 
 export type Listener<E extends TrackerEvent['type']> = (event: EventMap[E]) => void;
 
-// TODO: реализуй типобезопасный EventBus:
-//   - on<E>(type, listener): возвращает unsubscribe-функцию
-//   - emit<E>(event): вызывает всех слушателей этого type
-//   - off<E>(type, listener): убирает конкретного слушателя
-//   - listenerCount(type)
-// Гарантии: listener вызывается только для своего типа события.
-
 export class EventBus {
-  public on<E extends TrackerEvent['type']>(_type: E, _listener: Listener<E>): () => void {
-    throw new Error('Not implemented');
+  private readonly listeners = new Map<TrackerEvent['type'], Set<(event: TrackerEvent) => void>>();
+
+  public on<E extends TrackerEvent['type']>(type: E, listener: Listener<E>): () => void {
+    let bucket = this.listeners.get(type);
+    if (!bucket) {
+      bucket = new Set();
+      this.listeners.set(type, bucket);
+    }
+    bucket.add(listener as (event: TrackerEvent) => void);
+    return () => this.off(type, listener);
   }
 
-  public off<E extends TrackerEvent['type']>(_type: E, _listener: Listener<E>): void {
-    throw new Error('Not implemented');
+  public off<E extends TrackerEvent['type']>(type: E, listener: Listener<E>): void {
+    this.listeners.get(type)?.delete(listener as (event: TrackerEvent) => void);
   }
 
-  public emit(_event: TrackerEvent): void {
-    throw new Error('Not implemented');
+  public emit(event: TrackerEvent): void {
+    const bucket = this.listeners.get(event.type);
+    if (!bucket) return;
+    for (const listener of bucket) {
+      listener(event);
+    }
   }
 
-  public listenerCount(_type: TrackerEvent['type']): number {
-    throw new Error('Not implemented');
+  public listenerCount(type: TrackerEvent['type']): number {
+    return this.listeners.get(type)?.size ?? 0;
   }
 }

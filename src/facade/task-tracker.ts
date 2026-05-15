@@ -13,18 +13,6 @@ import { createBug, createFeature, createChore } from '../factory/task-factory.j
 import type { SortStrategy } from '../strategy/sort-strategies.js';
 import { sortTasks } from '../strategy/sort-strategies.js';
 
-// Facade поверх всех паттернов. Публичный API:
-//   - addTask({ type, title, priority?, assignee? })
-//   - removeTask(id)
-//   - moveTask(id, to)            <-- проверяет State-переход через assertTransition
-//   - renameTask(id, title)
-//   - undo() / redo()
-//   - list(strategy?)             <-- Strategy сортировки
-//   - events: EventBus            <-- Observer
-//
-// Главная инвариантность: каждое мутирующее действие проходит через CommandStack
-// и эмитит соответствующее событие через events.
-
 export interface AddTaskInput {
   type: TaskType;
   title: string;
@@ -37,21 +25,42 @@ export class TaskTracker {
   private readonly board = new Board();
   private readonly stack = new CommandStack();
 
-  public addTask(_input: AddTaskInput): Task {
-    throw new Error('Not implemented');
+  public addTask(input: AddTaskInput): Task {
+    const task = this.createTask(input);
+    this.stack.do(new AddTaskCommand(this.board, task));
+    this.events.emit({ type: 'task:added', task });
+    return task;
   }
 
-  public removeTask(_id: string): void {
-    throw new Error('Not implemented');
+  public removeTask(id: string): void {
+    const task = this.board.get(id);
+    if (!task) return;
+    this.stack.do(new RemoveTaskCommand(this.board, id));
+    this.events.emit({ type: 'task:removed', taskId: id });
   }
 
-  public moveTask(_id: string, _to: TaskStatus): void {
-    // ПОДСКАЗКА: проверь переход через assertTransition ДО выполнения команды.
-    throw new Error('Not implemented');
+  public moveTask(id: string, to: TaskStatus): void {
+    const task = this.board.get(id);
+    if (!task) return;
+    assertTransition(task.status, to);
+    if (task.status === to) return;
+    const from = task.status;
+    this.stack.do(new MoveTaskCommand(this.board, id, to));
+    const moved = this.board.get(id);
+    if (moved) {
+      this.events.emit({ type: 'task:moved', task: moved, from, to });
+    }
   }
 
-  public renameTask(_id: string, _title: string): void {
-    throw new Error('Not implemented');
+  public renameTask(id: string, title: string): void {
+    const task = this.board.get(id);
+    if (!task) return;
+    const previous = task;
+    this.stack.do(new RenameTaskCommand(this.board, id, title));
+    const updated = this.board.get(id);
+    if (updated) {
+      this.events.emit({ type: 'task:updated', task: updated, previous });
+    }
   }
 
   public list(strategy?: SortStrategy): Task[] {
@@ -59,11 +68,11 @@ export class TaskTracker {
   }
 
   public undo(): void {
-    throw new Error('Not implemented');
+    this.stack.undo();
   }
 
   public redo(): void {
-    throw new Error('Not implemented');
+    this.stack.redo();
   }
 
   public canUndo(): boolean {
@@ -74,12 +83,10 @@ export class TaskTracker {
     return this.stack.canRedo();
   }
 
-  // Вспомогалка — реально нужна, чтобы тесты могли инспектировать.
   public get(id: string): Task | undefined {
     return this.board.get(id);
   }
 
-  // ВЫЗОВ фабрики по типу — отдельно, чтобы видно: тут Factory Method.
   protected createTask(input: AddTaskInput): Task {
     switch (input.type) {
       case 'bug':
@@ -91,7 +98,6 @@ export class TaskTracker {
     }
   }
 
-  // Делаем вспомогалки доступными подклассам/тестам:
   public _boardRef(): Board {
     return this.board;
   }
