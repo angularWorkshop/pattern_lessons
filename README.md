@@ -1,4 +1,4 @@
-# Topic 20 · Exercise 20.1 — State: светофор
+# Topic 20 · Exercise 20.1 — State: светофор · Solution
 
 Реализуй классический State pattern: три состояния (Red, Green, Yellow) и контекст TrafficLight, делегирующий поведение текущему состоянию.
 
