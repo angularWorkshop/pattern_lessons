@@ -1,12 +1,13 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { ChatRoom, ChatUser, type ChatMessage } from '../../src/chat.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Mediator type contracts', () => {
+  it('ChatRoom methods have the expected signatures', () => {
+    expectTypeOf(ChatRoom.prototype.join).parameters.toEqualTypeOf<[ChatUser]>();
+    expectTypeOf(ChatRoom.prototype.broadcast).parameters.toEqualTypeOf<[string, string]>();
+    expectTypeOf(ChatRoom.prototype.send).parameters.toEqualTypeOf<[string, string, string]>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('ChatMessage shape', () => {
+    expectTypeOf<ChatMessage>().toEqualTypeOf<{ from: string; to: string | 'all'; body: string }>();
   });
 });

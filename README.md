@@ -1,53 +1,28 @@
-# pattern_lessons
+# Topic 17 · Exercise 17.1 — Mediator: чат-комната
 
-Base repository for EduTec Design Patterns course exercises.
+Реализуй `ChatRoom` — медиатор для общения `ChatUser`'ов. Пользователи не имеют прямых ссылок друг на друга; всё общение идёт через комнату.
 
-Each exercise should branch from `main` into:
+## Что нужно сделать
 
-- `lesson-topic-XX-exercise-YY-slug`
-- `answer-topic-XX-exercise-YY-slug`
+В `src/chat.ts` реализуй методы `ChatRoom`:
 
-The repository is intentionally framework-agnostic. It provides:
+- `join(user)` — положить в `Map<name, user>`
+- `leave(name)` — удалить из мапы
+- `broadcast(from, body)`:
+  - если `from` не зарегистрирован → throw
+  - доставить всем зарегистрированным, кроме отправителя: `user.receive({ from, to: 'all', body })`
+- `send(from, to, body)`:
+  - если `from` или `to` не зарегистрирован → throw
+  - доставить только адресату: `to.receive({ from, to, body })`
 
-- strict TypeScript configuration
-- unit tests via Vitest
-- type tests via `expectTypeOf`
-- library-ready build via `tsup`
-- package validation via `npm pack`
+Класс `ChatUser` уже готов — он зовёт `room.broadcast` и `room.send` через свои методы `say` / `whisper`.
 
-## Production standard
+## Главное
 
-- branch format and task rules: [EXERCISE_STANDARD.md](EXERCISE_STANDARD.md)
-- reusable starter files: [`templates/exercise/`](templates/exercise)
+Пользователь знает только комнату. Тест «no direct list of other users» проверяет, что у пользователя нет поля с массивом других пользователей — это и есть смысл Mediator: один знает всех, остальные — только медиатор.
 
-Recommended workflow for a new exercise:
+## Критерии сдачи
 
-1. Branch from `main` into `lesson-topic-XX-exercise-YY-slug`.
-2. Copy the files from `templates/exercise/` into the repository root.
-3. Adapt `README.md`, `src/index.ts`, and tests for the specific task.
-4. Ensure lesson branch has failing tests for unfinished `TODO`s.
-5. Create `answer-topic-XX-exercise-YY-slug` from the lesson branch and finish the solution.
-
-## Scripts
-
-- `npm run build` — build ESM, CJS and declarations into `dist/`
-- `npm run typecheck` — run TypeScript without emitting files
-- `npm run test` — run Vitest once
-- `npm run test:watch` — run Vitest in watch mode
-- `npm run check` — run typecheck and tests
-- `npm run pack:check` — create a package tarball locally
-
-## Suggested exercise layout
-
-- `src/` — starter or answer implementation
-- `tests/unit/` — behavioral tests
-- `tests/types/` — type-level assertions
-- `README.md` — exercise brief and local run instructions
-
-## Local workflow
-
-```bash
-npm install
-npm run check
-npm run build
-```
+- 7 тестов в `tests/unit/chat.test.ts` зелёные
+- Тип-контракты в `tests/types/index.test.ts` зелёные
+- `npm run check` зелёный
