@@ -1,4 +1,4 @@
-# Topic 19 · Exercise 19.1 — Observer: типизированный EventEmitter
+# Topic 19 · Exercise 19.1 — Observer: типизированный EventEmitter · Solution
 
 Реализуй `EventEmitter<Events>` с типизированными именами событий и аргументами. Передал не тот тип в `emit` — ошибка компилятора.
 
