@@ -1,35 +1,39 @@
-// Mediator: ChatRoom — координатор между Users.
-// Пользователи общаются только через комнату, не имеют ссылок друг на друга.
-
 export interface ChatMessage {
   from: string;
   to: string | 'all';
   body: string;
 }
 
-// TODO: реализовать ChatRoom.
-// - join(user): зарегистрировать пользователя в комнате
-// - leave(name): убрать пользователя
-// - broadcast(from, body): доставить сообщение всем кроме отправителя
-// - send(from, to, body): доставить ровно адресату
-// Если from/to не зарегистрирован — кинуть ошибку.
 export class ChatRoom {
   private readonly users = new Map<string, ChatUser>();
 
-  public join(_user: ChatUser): void {
-    throw new Error('ChatRoom.join is not implemented yet');
+  public join(user: ChatUser): void {
+    this.users.set(user.name, user);
   }
 
-  public leave(_name: string): void {
-    throw new Error('ChatRoom.leave is not implemented yet');
+  public leave(name: string): void {
+    this.users.delete(name);
   }
 
-  public broadcast(_from: string, _body: string): void {
-    throw new Error('ChatRoom.broadcast is not implemented yet');
+  public broadcast(from: string, body: string): void {
+    if (!this.users.has(from)) {
+      throw new Error(`ChatRoom.broadcast: unknown sender "${from}"`);
+    }
+    for (const [name, user] of this.users) {
+      if (name === from) continue;
+      user.receive({ from, to: 'all', body });
+    }
   }
 
-  public send(_from: string, _to: string, _body: string): void {
-    throw new Error('ChatRoom.send is not implemented yet');
+  public send(from: string, to: string, body: string): void {
+    if (!this.users.has(from)) {
+      throw new Error(`ChatRoom.send: unknown sender "${from}"`);
+    }
+    const recipient = this.users.get(to);
+    if (!recipient) {
+      throw new Error(`ChatRoom.send: unknown recipient "${to}"`);
+    }
+    recipient.receive({ from, to, body });
   }
 }
 
@@ -48,7 +52,6 @@ export class ChatUser {
     this.room.send(this.name, to, body);
   }
 
-  // Зовётся комнатой при доставке сообщения.
   public receive(message: ChatMessage): void {
     this.received.push(message);
   }
