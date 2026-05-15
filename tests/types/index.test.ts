@@ -1,12 +1,20 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import {
+  TrafficLight,
+  type LightColor,
+  type TrafficLightState,
+} from '../../src/traffic-light.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('State type contracts', () => {
+  it('LightColor is the union of three colors', () => {
+    expectTypeOf<LightColor>().toEqualTypeOf<'red' | 'green' | 'yellow'>();
   });
 
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('TrafficLight.getColor returns LightColor', () => {
+    expectTypeOf(TrafficLight.prototype.getColor).returns.toEqualTypeOf<LightColor>();
+  });
+
+  it('TrafficLightState.next returns TrafficLightState', () => {
+    expectTypeOf<TrafficLightState['next']>().returns.toEqualTypeOf<TrafficLightState>();
   });
 });
