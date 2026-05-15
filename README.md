@@ -1,4 +1,4 @@
-# Topic 19 · Exercise 19.2 — Observer: signals на 50 строк
+# Topic 19 · Exercise 19.2 — Observer: signals на 50 строк · Solution
 
 Реализуй упрощённые signals в стиле Solid/Angular. `createSignal` возвращает геттер и сеттер; `effect` автоматически подписывается на signal-ы, которые читает.
 
