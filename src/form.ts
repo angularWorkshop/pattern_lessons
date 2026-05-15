@@ -1,8 +1,3 @@
-// Mediator для координированной формы.
-// Поля знают только Form (медиатор) и сообщают ей о своих изменениях.
-// Form применяет правила зависимостей: смена страны → города очищаются;
-// тип "юрлицо" → поле ИНН видимое; иначе скрыто.
-
 export type CustomerType = 'individual' | 'business';
 
 export interface FormState {
@@ -20,15 +15,6 @@ const CITIES_BY_COUNTRY: Record<string, readonly string[]> = {
   DE: ['Berlin', 'Munich'],
 };
 
-// TODO: реализовать Form (медиатор).
-// - update(field, value): обновить поле и применить правила:
-//   1. Если изменилась country — обнулить city и записать cityOptions из CITIES_BY_COUNTRY (если страна неизвестна — пустой массив)
-//   2. Если изменился customerType:
-//      - 'business' → innVisible = true (inn оставить как есть)
-//      - 'individual' → innVisible = false, inn = '' (очистить)
-//   3. Если изменилось city — проверить, что оно есть в cityOptions; если нет — кинуть ошибку
-//   4. Прочие поля — просто записать
-// - getState() — снапшот текущего состояния
 export class Form {
   private state: FormState = {
     country: '',
@@ -39,8 +25,38 @@ export class Form {
     cityOptions: [],
   };
 
-  public update<K extends keyof FormState>(_field: K, _value: FormState[K]): void {
-    throw new Error('Form.update is not implemented yet');
+  public update<K extends keyof FormState>(field: K, value: FormState[K]): void {
+    if (field === 'country') {
+      const country = value as string;
+      this.state = {
+        ...this.state,
+        country,
+        city: '',
+        cityOptions: CITIES_BY_COUNTRY[country] ?? [],
+      };
+      return;
+    }
+
+    if (field === 'customerType') {
+      const next = value as CustomerType;
+      if (next === 'business') {
+        this.state = { ...this.state, customerType: 'business', innVisible: true };
+      } else {
+        this.state = { ...this.state, customerType: 'individual', innVisible: false, inn: '' };
+      }
+      return;
+    }
+
+    if (field === 'city') {
+      const city = value as string;
+      if (!this.state.cityOptions.includes(city)) {
+        throw new Error(`Form: city "${city}" is not in current cityOptions`);
+      }
+      this.state = { ...this.state, city };
+      return;
+    }
+
+    this.state = { ...this.state, [field]: value };
   }
 
   public getState(): FormState {
