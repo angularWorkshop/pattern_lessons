@@ -1,6 +1,3 @@
-// AST для арифметики через discriminated union.
-// Это идиоматичный TS-аналог Visitor: операции — функции с exhaustive switch.
-
 export type Expr =
   | { kind: 'num'; value: number }
   | { kind: 'var'; name: string }
@@ -8,26 +5,61 @@ export type Expr =
 
 export type Env = Readonly<Record<string, number>>;
 
-// TODO: evaluate(node, env).
-// switch (node.kind):
-//   num   → node.value
-//   var   → env[node.name] || throw
-//   binop → evaluate(left) op evaluate(right), на 0 при '/' — throw
-// default — const _: never = node, throw для exhaustive проверки.
-export function evaluate(_node: Expr, _env: Env): number {
-  throw new Error('evaluate is not implemented yet');
+export function evaluate(node: Expr, env: Env): number {
+  switch (node.kind) {
+    case 'num':
+      return node.value;
+    case 'var': {
+      const value = env[node.name];
+      if (value === undefined) {
+        throw new Error(`Unknown variable: ${node.name}`);
+      }
+      return value;
+    }
+    case 'binop': {
+      const left = evaluate(node.left, env);
+      const right = evaluate(node.right, env);
+      switch (node.op) {
+        case '+':
+          return left + right;
+        case '-':
+          return left - right;
+        case '*':
+          return left * right;
+        case '/':
+          if (right === 0) throw new Error('Division by zero');
+          return left / right;
+      }
+    }
+  }
 }
 
-// TODO: prettyPrint(node).
-// num   → String(node.value)
-// var   → node.name
-// binop → `(${prettyPrint(left)} ${op} ${prettyPrint(right)})`
-export function prettyPrint(_node: Expr): string {
-  throw new Error('prettyPrint is not implemented yet');
+export function prettyPrint(node: Expr): string {
+  switch (node.kind) {
+    case 'num':
+      return String(node.value);
+    case 'var':
+      return node.name;
+    case 'binop':
+      return `(${prettyPrint(node.left)} ${node.op} ${prettyPrint(node.right)})`;
+  }
 }
 
-// TODO: collectVars(node) — собрать все имена переменных, в которых появляется var.
-// Возвращает массив уникальных строк (Set → Array).
-export function collectVars(_node: Expr): readonly string[] {
-  throw new Error('collectVars is not implemented yet');
+export function collectVars(node: Expr): readonly string[] {
+  const out = new Set<string>();
+  const walk = (n: Expr): void => {
+    switch (n.kind) {
+      case 'num':
+        return;
+      case 'var':
+        out.add(n.name);
+        return;
+      case 'binop':
+        walk(n.left);
+        walk(n.right);
+        return;
+    }
+  };
+  walk(node);
+  return [...out];
 }

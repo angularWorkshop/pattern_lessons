@@ -1,4 +1,4 @@
-# Topic 23 · Exercise 23.1 — Visitor через discriminated union
+# Topic 23 · Exercise 23.1 — Visitor через discriminated union · Solution
 
 Реализуй три операции (evaluate, prettyPrint, collectVars) над одним AST через exhaustive switch. Это идиоматичный TS-аналог Visitor: данные и операции разделены, новые операции добавляются без правки узлов.
 
