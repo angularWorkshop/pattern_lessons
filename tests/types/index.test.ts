@@ -1,12 +1,14 @@
 import { expectTypeOf } from 'vitest';
-import { createLessonUser, createUserId, type LessonUser, type UserId } from '../../src/index';
+import { TextDocument, Caretaker, type DocumentSnapshot } from '../../src/memento.js';
 
-describe('type baseline', () => {
-  it('preserves branded ids', () => {
-    expectTypeOf(createUserId('user:max')).toEqualTypeOf<UserId>();
+describe('Memento type contracts', () => {
+  it('save returns DocumentSnapshot', () => {
+    expectTypeOf(TextDocument.prototype.save).returns.toEqualTypeOf<DocumentSnapshot>();
   });
-
-  it('infers lesson user shape', () => {
-    expectTypeOf(createLessonUser('Max')).toEqualTypeOf<LessonUser>();
+  it('restore takes DocumentSnapshot', () => {
+    expectTypeOf(TextDocument.prototype.restore).parameters.toEqualTypeOf<[DocumentSnapshot]>();
+  });
+  it('Caretaker.at returns DocumentSnapshot', () => {
+    expectTypeOf(Caretaker.prototype.at).returns.toEqualTypeOf<DocumentSnapshot>();
   });
 });
