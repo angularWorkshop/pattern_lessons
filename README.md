@@ -1,0 +1,26 @@
+# Добавить новую scoring strategy для проверки курса без изменения старых стратегий.
+
+Answer branch for the EduTec Design Patterns course.
+
+## Why this exercise exists
+
+Topic: Strategy: заменить ветвление набором правил
+
+The goal is to make the pattern useful in a concrete code situation, not just to mention its name.
+
+## What to finish
+
+- Open `src/index.ts`.
+- Complete `completePatternExercise()`.
+- Return `status: 'completed'`.
+- Keep the expected artifacts:
+- `strategy interface`
+- `strategy map`
+- `open extension`
+- Add a note that mentions `pattern` and `strategy`.
+
+## Checks
+
+`npm run check` runs TypeScript and Vitest checks.
+
+Expected result for a completed solution: `ASSIGNMENT STATUS: COMPLETED`.
